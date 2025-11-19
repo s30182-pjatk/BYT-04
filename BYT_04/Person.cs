@@ -10,6 +10,7 @@ public class Person
     public readonly int Age;
     public readonly string PhoneNumber;
     public readonly string Email;
+    public readonly Address address;
 
     public Person(string name, string? middleName, string surname, DateTime birthDate, string gender, string phoneNumber, string email, Address address)
     {
@@ -28,7 +29,7 @@ public class Person
         Email = email;
 
         Age = CalculateAge(birthDate);
-        address = address;
+        this.address = address;
 
     }
 
