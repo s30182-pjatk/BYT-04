@@ -2,7 +2,7 @@
 
 namespace BYT_04_Test;
 
-public class Tests
+public class PersonTests
 {
     [Test]
     public void TestPersonInvalidDate()
