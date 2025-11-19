@@ -8,6 +8,8 @@ public class Tests
     public void TestPersonInvalidDate()
     {
         var invalidDate = DateTime.Today.AddDays(1);
-        Assert.Throws<ArgumentException>(() => new Person("Gleb", null, "Denisov", invalidDate, "male", "+48999999999", "email@gmail.com"));
+
+        var address = new Address("some", "another", "dom", "somecode", "someplace");
+        Assert.Throws<ArgumentException>(() => new Person("Gleb", null, "Denisov", invalidDate, "male", "+48999999999", "email@gmail.com", address));
     }
 }

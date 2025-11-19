@@ -11,7 +11,7 @@ public class Person
     public readonly string PhoneNumber;
     public readonly string Email;
 
-    public Person(string name, string? middleName, string surname, DateTime birthDate, string gender, string phoneNumber, string email)
+    public Person(string name, string? middleName, string surname, DateTime birthDate, string gender, string phoneNumber, string email, Address address)
     {
         
         if (birthDate > DateTime.Today)
@@ -28,6 +28,8 @@ public class Person
         Email = email;
 
         Age = CalculateAge(birthDate);
+        address = address;
+
     }
 
     private int CalculateAge(DateTime birthDate)
