@@ -39,6 +39,20 @@ public class Person
         Age = CalculateAge(birthDate);
     }
 
+    public Person()
+    {
+        Name = string.Empty;
+        MiddleName = null;
+        Surname = string.Empty;
+        BirthDate = DateTime.Today;
+        Gender = string.Empty;
+        PhoneNumber = string.Empty;
+        Email = string.Empty;
+        Address = new Address("", "", "", "", "");
+
+        Age = CalculateAge(BirthDate); 
+    }
+
     private int CalculateAge(DateTime birthDate)
     {
         var today = DateTime.Today;
