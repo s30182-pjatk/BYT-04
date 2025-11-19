@@ -14,4 +14,9 @@ public class Customer : Person
         IsVip = isVip;
         LoyaltyPoints = loyaltyPoints;
     }
+
+    public int CheckLoyaltyPoints()
+    {
+        return LoyaltyPoints;
+    }
 }
