@@ -2,19 +2,26 @@
 
 public class Person
 {
-    public readonly string Name;
-    public readonly string? MiddleName;
-    public readonly string Surname;
-    public readonly DateTime BirthDate;
-    public readonly string Gender;
-    public readonly int Age;
-    public readonly string PhoneNumber;
-    public readonly string Email;
-    public readonly Address address;
+    public string Name { get; set; }
+    public string? MiddleName { get; set; }
+    public string Surname { get; set; }
+    public DateTime BirthDate { get; set; }
+    public string Gender { get; set; }
+    public int Age { get; private set; }  // Age setter private so it's only changed internally
+    public string PhoneNumber { get; set; }
+    public string Email { get; set; }
+    public Address Address { get; set; }
 
-    public Person(string name, string? middleName, string surname, DateTime birthDate, string gender, string phoneNumber, string email, Address address)
+    public Person(
+        string name,
+        string? middleName,
+        string surname,
+        DateTime birthDate,
+        string gender,
+        string phoneNumber,
+        string email,
+        Address address)
     {
-        
         if (birthDate > DateTime.Today)
         {
             throw new ArgumentException("Birth date cannot be in the future.");
@@ -27,34 +34,36 @@ public class Person
         Gender = gender;
         PhoneNumber = phoneNumber;
         Email = email;
+        Address = address;
 
         Age = CalculateAge(birthDate);
-        this.address = address;
-
     }
 
     private int CalculateAge(DateTime birthDate)
     {
         var today = DateTime.Today;
         int age = today.Year - birthDate.Year;
-
         if (birthDate.Date > today.AddYears(-age))
         {
             age--;
         }
-
         return age;
     }
-    
+
+    // If someone changes BirthDate later via setter, update Age accordingly:
+    public void UpdateAge()
+    {
+        Age = CalculateAge(BirthDate);
+    }
 }
 
 public class Address
 {
-    public readonly string Street;
-    public readonly string City;
-    public readonly string State;
-    public readonly string PostalCode;
-    public readonly string Country;
+    public string Street { get; set; }
+    public string City { get; set; }
+    public string State { get; set; }
+    public string PostalCode { get; set; }
+    public string Country { get; set; }
 
     public Address(string street, string city, string state, string postalCode, string country)
     {
