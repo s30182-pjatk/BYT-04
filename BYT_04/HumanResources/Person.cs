@@ -1,5 +1,11 @@
 ﻿namespace BYT_04;
 
+using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
+using System.IO;
+
+[Serializable]
 public class Person
 {
     public string Name { get; set; }
@@ -7,7 +13,6 @@ public class Person
     public string Surname { get; set; }
     public DateTime BirthDate { get; set; }
     public string Gender { get; set; }
-    public int Age { get; private set; }  // Age setter private so it's only changed internally
     public string PhoneNumber { get; set; }
     public string Email { get; set; }
     public Address Address { get; set; }
@@ -35,32 +40,26 @@ public class Person
         PhoneNumber = phoneNumber;
         Email = email;
         Address = address;
-
-        Age = CalculateAge(birthDate);
+        
     }
 
     public Person()
     {
     }
 
-    private int CalculateAge(DateTime birthDate)
+    public int GetAge()
     {
         var today = DateTime.Today;
-        int age = today.Year - birthDate.Year;
-        if (birthDate.Date > today.AddYears(-age))
+        int age = today.Year - BirthDate.Year;
+        if (BirthDate.Date > today.AddYears(-age))
         {
             age--;
         }
         return age;
     }
-
-    // If someone changes BirthDate later via setter, update Age accordingly:
-    public void UpdateAge()
-    {
-        Age = CalculateAge(BirthDate);
-    }
 }
 
+[Serializable]
 public class Address
 {
     public string Street { get; set; }
@@ -69,6 +68,10 @@ public class Address
     public string PostalCode { get; set; }
     public string Country { get; set; }
 
+    public Address()
+    {
+    }
+
     public Address(string street, string city, string state, string postalCode, string country)
     {
         Street = street;
@@ -76,5 +79,66 @@ public class Address
         State = state;
         PostalCode = postalCode;
         Country = country;
+    }
+}
+
+public static class PersonExtent
+{
+    private static readonly string DirectoryPath =
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "HumanResources", "persistence"));
+
+    private static readonly string FilePath = Path.Combine(DirectoryPath, "persons.xml");
+
+    public static List<Person> Persons { get; private set; } = new();
+
+    public static void Save()
+    {
+        Console.WriteLine("Saving to: " + FilePath);
+
+        if (!Directory.Exists(DirectoryPath))
+            Directory.CreateDirectory(DirectoryPath);
+
+        XmlSerializer serializer = new(typeof(List<Person>));
+        using FileStream fs = new(FilePath, FileMode.Create);
+        serializer.Serialize(fs, Persons);
+    }
+
+    public static void Load()
+    {
+        Console.WriteLine("Loading from: " + FilePath);
+
+        if (!File.Exists(FilePath))
+            return;
+
+        XmlSerializer serializer = new(typeof(List<Person>));
+        using FileStream fs = new(FilePath, FileMode.Open);
+
+        if (serializer.Deserialize(fs) is List<Person> loaded)
+            Persons = loaded;
+    }
+    
+    public static void DisplayAll()
+    {
+        if (Persons.Count == 0)
+        {
+            Console.WriteLine("No persons found.");
+            return;
+        }
+
+        Console.WriteLine("\n--- Loaded Persons ---\n");
+
+        foreach (var p in Persons)
+        {
+            Console.WriteLine(
+                $"Name: {p.Name} {p.MiddleName} {p.Surname}\n" +
+                $"Birth Date: {p.BirthDate.ToShortDateString()}\n" +
+                $"Gender: {p.Gender}\n" +
+                $"Phone: {p.PhoneNumber}\n" +
+                $"Email: {p.Email}\n" +
+                $"Address: {p.Address.Street}, {p.Address.City}, {p.Address.State}, " +
+                $"{p.Address.PostalCode}, {p.Address.Country}\n" +
+                "-----------------------------\n"
+            );
+        }
     }
 }

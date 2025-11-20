@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfPerson xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Person>
+    <Name>John</Name>
+    <MiddleName>A</MiddleName>
+    <Surname>Doe</Surname>
+    <BirthDate>1990-05-12T00:00:00</BirthDate>
+    <Gender>Male</Gender>
+    <PhoneNumber>123456789</PhoneNumber>
+    <Email>john.doe@example.com</Email>
+    <Address>
+      <Street>123 Street</Street>
+      <City>City</City>
+      <State>State</State>
+      <PostalCode>11111</PostalCode>
+      <Country>Country</Country>
+    </Address>
+  </Person>
+</ArrayOfPerson>
