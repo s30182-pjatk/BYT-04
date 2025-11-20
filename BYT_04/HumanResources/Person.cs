@@ -8,6 +8,7 @@ using System.IO;
 [Serializable]
 public class Person
 {
+    
     private string _name = null!;
     private string? _middleName;
     private string _surname = null!;
