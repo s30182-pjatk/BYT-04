@@ -7,7 +7,7 @@ public class Person
     public string Surname { get; set; }
     public DateTime BirthDate { get; set; }
     public string Gender { get; set; }
-    public int Age { get;}  // 
+    public int Age { get; private set; }  // Age setter private so it's only changed internally
     public string PhoneNumber { get; set; }
     public string Email { get; set; }
     public Address Address { get; set; }
