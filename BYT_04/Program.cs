@@ -34,8 +34,8 @@ public class Program
         
         var reservation = new Reservation(
             1,
-            new DateTime(2025, 11,22 ),
-            new DateTime(2025, 12,2 ),
+            new DateTime(2025, 11,22),
+            new DateTime(2025, 12,22),
             ReservationStatus.Pending,
             105
         );
@@ -77,10 +77,9 @@ public class Program
             accomodation,
             5,
             new DateTime(2025, 11, 22),
-            new DateTime(2025, 12, 2),
+            new DateTime(2025, 12, 22),
             "Good",
-            "Poor",
-            "Heater needs to be fixed"
+            notes: "Heater needs to be fixed"
         );
         
         ReservationAccomodationExtent.ReservationAccomodations.Add(reservationaccomodation);

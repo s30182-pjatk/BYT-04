@@ -55,6 +55,7 @@ public class ReservationAccomodation
         {
             if(value < CheckInDate)
                 throw new ArgumentException("Check-out date cannot be earlier than Check-In-Date.");
+            _checkOutDate = value;
         }
     }
 
@@ -67,13 +68,13 @@ public class ReservationAccomodation
     public string? ConditionAfter
     {
         get => _conditionAfter;
-        set => _conditionAfter = ValidateRequiredString(value, nameof(ConditionAfter));
+        set => _conditionAfter = string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
     public string? Notes
     {
         get => _notes;
-        set => _notes = ValidateRequiredString(value, nameof(Notes));
+        set => _notes = string.IsNullOrWhiteSpace(value) ? null : value;
     }
     
     public ReservationAccomodation(){}
@@ -85,8 +86,8 @@ public class ReservationAccomodation
         DateTime checkInDate,
         DateTime checkOutDate,
         string conditionBefore,
-        string? conditionAfter,
-        string? notes)
+        string? conditionAfter = null,
+        string? notes = null)
     {
         Reservation = reservation;
         Accomodation = accomodation;
