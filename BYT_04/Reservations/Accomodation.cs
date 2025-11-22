@@ -33,7 +33,7 @@ public class Accomodation
         set
         {
             if (value <= 0) 
-                throw new ArgumentException("Capacity must be positive."); 
+                throw new ArgumentException("Capacity must be greater than zero."); 
                 _capacity = value;
         }
     }
