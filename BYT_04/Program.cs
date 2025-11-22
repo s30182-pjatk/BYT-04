@@ -47,5 +47,23 @@ public class Program
         
         //Display loaded reservations
         ReservationExtent.DisplayAll();
+        
+        //-------------------------------------------------------------------------------------------------------
+        
+        //ACCOMODATIONS
+        AccomodationExtent.Load();
+
+        var accomodation = new Accomodation(
+            "A160",
+            AccomodationType.Room,
+            7);
+        
+        AccomodationExtent.Accomodations.Add(accomodation);
+        
+        //Save to XML
+        AccomodationExtent.Save();
+        
+        //Display loaded Accomodations
+        AccomodationExtent.DisplayAll();
     }
 }

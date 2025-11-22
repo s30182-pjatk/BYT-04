@@ -1,3 +1,5 @@
+using System.Xml.Serialization;
+
 namespace BYT_04.Reservations;
 public enum AccomodationType
 {
@@ -30,10 +32,9 @@ public class Accomodation
         get => _capacity;
         set
         {
-            if (value <= 0)
-            {
-                throw new ArgumentException("Capacity must be positive.");
-            }
+            if (value <= 0) 
+                throw new ArgumentException("Capacity must be positive."); 
+                _capacity = value;
         }
     }
     
@@ -52,5 +53,72 @@ public class Accomodation
             throw new ArgumentException($"{propertyName} cannot be null, empty, or whitespace.");
 
         return value;
+    }
+}
+
+public static class AccomodationExtent
+{
+    private static string _directoryPath =
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
+
+    private static string FilePath => Path.Combine(_directoryPath, "accomodations.xml");
+
+    public static List<Accomodation> Accomodations { get; private set; } = new();
+
+    public static void SetDirectory(string newDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(newDirectory))
+            throw new ArgumentException("Directory cannot be null or empty.");
+
+        _directoryPath = newDirectory;
+    }
+
+    public static void Save()
+    {
+        Console.WriteLine("Saving to: " + FilePath);
+
+        if (!Directory.Exists(_directoryPath))
+            Directory.CreateDirectory(_directoryPath);
+
+        XmlSerializer serializer = new(typeof(List<Accomodation>));
+
+        using FileStream fs = new(FilePath, FileMode.Create);
+        serializer.Serialize(fs, Accomodations);
+    }
+
+    public static void Load()
+    {
+        Console.WriteLine("Loading from: " + FilePath);
+
+        if (!File.Exists(FilePath))
+            return;
+
+        XmlSerializer serializer = new(typeof(List<Accomodation>));
+
+        using FileStream fs = new(FilePath, FileMode.Open);
+
+        if (serializer.Deserialize(fs) is List<Accomodation> loaded)
+            Accomodations = loaded;
+    }
+
+    public static void DisplayAll()
+    {
+        if (Accomodations.Count == 0)
+        {
+            Console.WriteLine("No Accomodations found.");
+            return;
+        }
+
+        Console.WriteLine("\n--- Loaded Accomodations ---\n");
+
+        foreach (var a in Accomodations)
+        {
+            Console.WriteLine(
+                $"Number: {a.Number}\n" +
+                $"Type: {a.Type}\n" +
+                $"Capacity: {a.Capacity}\n" +
+                "-----------------------------\n"
+            );
+        }
     }
 }

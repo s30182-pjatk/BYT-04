@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="HumanResources\persistence\" />
       <Folder Include="Reservations\persistence\" />
     </ItemGroup>
 
