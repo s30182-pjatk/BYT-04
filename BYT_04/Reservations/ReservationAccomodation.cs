@@ -1,5 +1,8 @@
+using System.Xml.Serialization;
+
 namespace BYT_04.Reservations;
 
+[Serializable]
 public class ReservationAccomodation
 {
     private Reservation _reservation = null!;
@@ -30,6 +33,7 @@ public class ReservationAccomodation
         {
             if (value <= 0)
                 throw new ArgumentException("Number of guests must be greater than zero.");
+            _numberOfGuests = value;
         }
     }
 
@@ -38,7 +42,7 @@ public class ReservationAccomodation
         get => _checkInDate;
         set
         {
-            if(value <= DateTime.Today)
+            if(value > DateTime.Today)
                 throw new ArgumentException("Check-In date cannot be in the future.");
             _checkInDate = value;
         }
@@ -103,5 +107,78 @@ public class ReservationAccomodation
         return value;
     }
     
-    
+}
+
+public static class ReservationAccomodationExtent
+{
+    private static string _directoryPath =
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
+
+    private static string FilePath => Path.Combine(_directoryPath, "reservationaccomodation.xml");
+
+    public static List<ReservationAccomodation> ReservationAccomodations { get; private set; } = new();
+
+    public static void SetDirectory(string newDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(newDirectory))
+            throw new ArgumentException("Directory cannot be null or empty.");
+
+        _directoryPath = newDirectory;
+    }
+
+    public static void Save()
+    {
+        Console.WriteLine("Saving to: " + FilePath);
+
+        if (!Directory.Exists(_directoryPath))
+            Directory.CreateDirectory(_directoryPath);
+
+        XmlSerializer serializer = new(typeof(List<ReservationAccomodation>));
+
+        using FileStream fs = new(FilePath, FileMode.Create);
+        serializer.Serialize(fs, ReservationAccomodations);
+    }
+
+    public static void Load()
+    {
+        Console.WriteLine("Loading from: " + FilePath);
+
+        if (!File.Exists(FilePath))
+            return;
+
+        XmlSerializer serializer = new(typeof(List<ReservationAccomodation>));
+
+        using FileStream fs = new(FilePath, FileMode.Open);
+
+        if (serializer.Deserialize(fs) is List<ReservationAccomodation> loaded)
+            ReservationAccomodations = loaded;
+    }
+
+    public static void DisplayAll()
+    {
+        if (ReservationAccomodations.Count == 0)
+        {
+            Console.WriteLine("No reservation-accommodation links found.");
+            return;
+        }
+
+        Console.WriteLine("\n--- Loaded Reservation-Accommodation ---\n");
+
+        foreach (var ra in ReservationAccomodations)
+        {
+            Console.WriteLine(
+                $"Reservation ID: {ra.Reservation.ReservationId}\n" +
+                $"Accommodation Number: {ra.Accomodation.Number}\n" +
+                $"Type: {ra.Accomodation.Type}\n" +
+                $"Capacity: {ra.Accomodation.Capacity}\n" +
+                $"Number of Guests: {ra.NumberOfGuests}\n" +
+                $"Check-In: {ra.CheckInDate.ToShortDateString()}\n" +
+                $"Check-Out: {ra.CheckOutDate.ToShortDateString()}\n" +
+                $"Condition Before: {ra.ConditionBefore}\n" +
+                $"Condition After: {ra.ConditionAfter ?? "N/A"}\n" +
+                $"Notes: {ra.Notes ?? "N/A"}\n" +
+                "-----------------------------\n"
+            );
+        }
+    }
 }

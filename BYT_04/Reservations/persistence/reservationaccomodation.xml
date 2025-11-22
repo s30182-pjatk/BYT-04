@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfReservationAccomodation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ReservationAccomodation>
+    <Reservation>
+      <ReservationId>1</ReservationId>
+      <StartDate>2025-11-22T00:00:00</StartDate>
+      <EndDate>2025-12-02T00:00:00</EndDate>
+      <Status>Pending</Status>
+      <TotalPrice>105</TotalPrice>
+    </Reservation>
+    <Accomodation>
+      <Number>A160</Number>
+      <Type>Room</Type>
+      <Capacity>7</Capacity>
+    </Accomodation>
+    <NumberOfGuests>5</NumberOfGuests>
+    <CheckInDate>2025-11-22T00:00:00</CheckInDate>
+    <CheckOutDate>0001-01-01T00:00:00</CheckOutDate>
+    <ConditionBefore>Good</ConditionBefore>
+    <ConditionAfter>Poor</ConditionAfter>
+    <Notes>Heater needs to be fixed</Notes>
+  </ReservationAccomodation>
+</ArrayOfReservationAccomodation>

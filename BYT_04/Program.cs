@@ -65,5 +65,29 @@ public class Program
         
         //Display loaded Accomodations
         AccomodationExtent.DisplayAll();
+        
+        
+        //-------------------------------------------------------------------------------------------------------------
+    
+        //ReservationAccomodation
+        ReservationAccomodationExtent.Load();
+
+        var reservationaccomodation = new ReservationAccomodation(
+            reservation,
+            accomodation,
+            5,
+            new DateTime(2025, 11, 22),
+            new DateTime(2025, 12, 2),
+            "Good",
+            "Poor",
+            "Heater needs to be fixed"
+        );
+        
+        ReservationAccomodationExtent.ReservationAccomodations.Add(reservationaccomodation);
+        
+        ReservationAccomodationExtent.Save();
+        ReservationAccomodationExtent.DisplayAll();
     }
+    
+    
 }

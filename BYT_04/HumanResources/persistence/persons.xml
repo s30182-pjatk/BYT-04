@@ -16,4 +16,52 @@
       <Country>Country</Country>
     </Address>
   </Person>
+  <Person>
+    <Name>John</Name>
+    <MiddleName>A</MiddleName>
+    <Surname>Doe</Surname>
+    <BirthDate>1990-05-12T00:00:00</BirthDate>
+    <Gender>Male</Gender>
+    <PhoneNumber>123456789</PhoneNumber>
+    <Email>john.doe@example.com</Email>
+    <Address>
+      <Street>123 Street</Street>
+      <City>City</City>
+      <State>State</State>
+      <PostalCode>11111</PostalCode>
+      <Country>Country</Country>
+    </Address>
+  </Person>
+  <Person>
+    <Name>John</Name>
+    <MiddleName>A</MiddleName>
+    <Surname>Doe</Surname>
+    <BirthDate>1990-05-12T00:00:00</BirthDate>
+    <Gender>Male</Gender>
+    <PhoneNumber>123456789</PhoneNumber>
+    <Email>john.doe@example.com</Email>
+    <Address>
+      <Street>123 Street</Street>
+      <City>City</City>
+      <State>State</State>
+      <PostalCode>11111</PostalCode>
+      <Country>Country</Country>
+    </Address>
+  </Person>
+  <Person>
+    <Name>John</Name>
+    <MiddleName>A</MiddleName>
+    <Surname>Doe</Surname>
+    <BirthDate>1990-05-12T00:00:00</BirthDate>
+    <Gender>Male</Gender>
+    <PhoneNumber>123456789</PhoneNumber>
+    <Email>john.doe@example.com</Email>
+    <Address>
+      <Street>123 Street</Street>
+      <City>City</City>
+      <State>State</State>
+      <PostalCode>11111</PostalCode>
+      <Country>Country</Country>
+    </Address>
+  </Person>
 </ArrayOfPerson>
