@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace BYT_04;
+namespace BYT_04.Reservations;
 
 public enum ReservationStatus
 {

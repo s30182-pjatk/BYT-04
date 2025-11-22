@@ -1,4 +1,4 @@
-namespace BYT_04;
+namespace BYT_04.Reservations;
 
 public class Program
 {
