@@ -7,4 +7,8 @@
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Reservations\persistence\" />
+    </ItemGroup>
+
 </Project>

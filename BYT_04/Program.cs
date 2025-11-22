@@ -4,6 +4,7 @@ public class Program
 {
     static void Main()
     {
+        //PEOPLE
         // Load existing people
         PersonExtent.Load();
 
@@ -24,5 +25,27 @@ public class Program
 
         // Display loaded persons
         PersonExtent.DisplayAll();
+        
+        //--------------------------------------------------------------------------------------------------------------
+        
+        //RESERVATIONS
+        // Load existing reservations
+        ReservationExtent.Load();
+        
+        var reservation = new Reservation(
+            1,
+            new DateTime(2025, 11,22 ),
+            new DateTime(2025, 12,2 ),
+            ReservationStatus.Pending,
+            105
+        );
+        
+        ReservationExtent.Reservations.Add(reservation);
+        
+        //Save to XML
+        ReservationExtent.Save();
+        
+        //Display loaded reservations
+        ReservationExtent.DisplayAll();
     }
 }

@@ -1,3 +1,5 @@
+using System.Xml.Serialization;
+
 namespace BYT_04;
 
 public enum ReservationStatus
@@ -100,5 +102,81 @@ public class Reservation
     public void ChangeReservationStatus(ReservationStatus newStatus)
     {
         Status = newStatus;
+    }
+}
+
+public static class ReservationExtent
+{
+    private static string _directoryPath =
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
+
+    private static string FilePath => Path.Combine(_directoryPath, "reservations.xml");
+
+    public static List<Reservation> Reservations { get; private set; } = new();
+
+    public static void SetDirectory(string newDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(newDirectory))
+            throw new ArgumentException("Directory cannot be null or empty.");
+        _directoryPath = newDirectory;
+    }
+
+    public static void Save()
+    {
+        Console.WriteLine("Saving to: " + FilePath);
+
+        if (!Directory.Exists(_directoryPath))
+            Directory.CreateDirectory(_directoryPath);
+
+        XmlSerializer serializer = new(typeof(List<Reservation>));
+        using FileStream fs = new(FilePath, FileMode.Create);
+        serializer.Serialize(fs, Reservations);
+    }
+
+    public static void Load()
+    {
+        Console.WriteLine("Loading from: " + FilePath);
+
+        if (!File.Exists(FilePath))
+            return;
+
+        XmlSerializer serializer = new(typeof(List<Reservation>));
+        using FileStream fs = new(FilePath, FileMode.Open);
+
+        if (serializer.Deserialize(fs) is List<Reservation> loaded)
+            Reservations = loaded;
+    }
+
+    public static List<Reservation> CheckPendingReservations()
+    {
+        return Reservations.FindAll(r => r.Status == ReservationStatus.Pending);
+    }
+
+    public static void RemoveCompletedReservations()
+    {
+        Reservations.RemoveAll(r => r.Status == ReservationStatus.Completed);
+    }
+
+    public static void DisplayAll()
+    {
+        if (Reservations.Count == 0)
+        {
+            Console.WriteLine("No reservations found.");
+            return;
+        }
+
+        Console.WriteLine("\n--- Loaded Reservations ---\n");
+
+        foreach (var r in Reservations)
+        {
+            Console.WriteLine(
+                $"ID: {r.ReservationId}\n" +
+                $"Start: {r.StartDate.ToShortDateString()}\n" +
+                $"End: {r.EndDate.ToShortDateString()}\n" +
+                $"Status: {r.Status}\n" +
+                $"Price: {r.TotalPrice}\n" +
+                "-----------------------------\n"
+            );
+        }
     }
 }
