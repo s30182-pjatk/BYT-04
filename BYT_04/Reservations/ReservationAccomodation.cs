@@ -128,7 +128,21 @@ public class ReservationAccomodation
 
         return value;
     }
-    
+
+    public override string ToString()
+    {
+        return $"Reservation ID: {Reservation.ReservationId}\n" +
+               $"Accommodation Number: {Accomodation.Number}\n" +
+               $"Type: {Accomodation.Type}\n" +
+               $"Capacity: {Accomodation.Capacity}\n" +
+               $"Number of Guests: {NumberOfGuests}\n" +
+               $"Check-In: {CheckInDate.ToShortDateString()}\n" +
+               $"Check-Out: {CheckOutDate.ToShortDateString()}\n" +
+               $"Condition Before: {ConditionBefore}\n" +
+               $"Condition After: {ConditionAfter ?? "N/A"}\n" +
+               $"Notes: {Notes ?? "N/A"}\n" +
+               "-----------------------------";
+    }
 }
 
 public static class ReservationAccomodationExtent
@@ -188,19 +202,7 @@ public static class ReservationAccomodationExtent
 
         foreach (var ra in ReservationAccomodations)
         {
-            Console.WriteLine(
-                $"Reservation ID: {ra.Reservation.ReservationId}\n" +
-                $"Accommodation Number: {ra.Accomodation.Number}\n" +
-                $"Type: {ra.Accomodation.Type}\n" +
-                $"Capacity: {ra.Accomodation.Capacity}\n" +
-                $"Number of Guests: {ra.NumberOfGuests}\n" +
-                $"Check-In: {ra.CheckInDate.ToShortDateString()}\n" +
-                $"Check-Out: {ra.CheckOutDate.ToShortDateString()}\n" +
-                $"Condition Before: {ra.ConditionBefore}\n" +
-                $"Condition After: {ra.ConditionAfter ?? "N/A"}\n" +
-                $"Notes: {ra.Notes ?? "N/A"}\n" +
-                "-----------------------------\n"
-            );
+            Console.WriteLine(ra);
         }
     }
 }

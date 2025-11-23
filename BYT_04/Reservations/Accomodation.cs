@@ -54,6 +54,14 @@ public class Accomodation
 
         return value;
     }
+
+    public override string ToString()
+    {
+        return $"Number: {Number}\n" +
+               $"Type: {Type}\n" +
+               $"Capacity: {Capacity}\n" +
+               "-----------------------------";
+    }
 }
 
 public static class AccomodationExtent
@@ -113,12 +121,7 @@ public static class AccomodationExtent
 
         foreach (var a in Accomodations)
         {
-            Console.WriteLine(
-                $"Number: {a.Number}\n" +
-                $"Type: {a.Type}\n" +
-                $"Capacity: {a.Capacity}\n" +
-                "-----------------------------\n"
-            );
+            Console.WriteLine(a);
         }
     }
 }
