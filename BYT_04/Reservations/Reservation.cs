@@ -137,13 +137,13 @@ public class Reservation
 
 public static class ReservationExtent
 {
+    public static List<Reservation> Reservations { get; private set; } = new();
+    
     private static string _directoryPath =
         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
 
     private static string FilePath => Path.Combine(_directoryPath, "reservations.xml");
-
-    public static List<Reservation> Reservations { get; private set; } = new();
-
+    
     public static void SetDirectory(string newDirectory)
     {
         if (string.IsNullOrWhiteSpace(newDirectory))

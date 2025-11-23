@@ -65,14 +65,14 @@ public class Accomodation
 }
 
 public static class AccomodationExtent
-{
+{ 
+    public static List<Accomodation> Accomodations { get; private set; } = new();
+    
     private static string _directoryPath =
         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
 
     private static string FilePath => Path.Combine(_directoryPath, "accomodations.xml");
-
-    public static List<Accomodation> Accomodations { get; private set; } = new();
-
+    
     public static void SetDirectory(string newDirectory)
     {
         if (string.IsNullOrWhiteSpace(newDirectory))
