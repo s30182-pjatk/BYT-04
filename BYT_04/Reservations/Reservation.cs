@@ -31,6 +31,8 @@ public class Reservation
         }
     }
     
+    //We ignore this so the Serializer doesn't crash on the validation logic
+    [XmlIgnore]
     public DateTime StartDate
     {
         get => _startDate;
@@ -42,6 +44,16 @@ public class Reservation
         }
     }
     
+    //used to avoid validating StartDate when loading from xml file
+    [XmlElement("StartDate")]
+    public DateTime StartDateSerialized
+    {
+        get => _startDate;
+        set => _startDate = value; //runs when loading the file, sets the field directly which fixes validation errors when loading
+    }
+    
+    //We ignore this so the Serializer doesn't crash on the validation logic
+    [XmlIgnore]
     public DateTime EndDate
     {
         get => _endDate;
@@ -51,6 +63,14 @@ public class Reservation
                 throw new ArgumentException("End date cannot be earlier than start date.");
             _endDate = value;
         }
+    }
+    
+    //used to avoid validating StartDate when loading from xml file and
+    [XmlElement("EndDate")]
+    public DateTime EndDateSerialized
+    {
+        get => _endDate;
+        set => _endDate = value; //runs when loading the file, sets the field directly which fixes validation errors when loading
     }
     
     public ReservationStatus Status

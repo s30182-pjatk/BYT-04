@@ -4,8 +4,9 @@ namespace BYT_04.Reservations;
 
 [Serializable]
 public class ReservationAccomodation
-{
+{   [XmlIgnore]
     private Reservation _reservation = null!;
+    [XmlIgnore]
     private Accomodation _accomodation = null!;
     private int _numberOfGuests;
     private DateTime _checkInDate;
@@ -36,7 +37,9 @@ public class ReservationAccomodation
             _numberOfGuests = value;
         }
     }
-
+    
+    //used to avoid validating StartDate when loading from xml file
+    [XmlIgnore]
     public DateTime CheckInDate
     {
         get => _checkInDate;
@@ -48,6 +51,16 @@ public class ReservationAccomodation
         }
     }
     
+    //used to avoid validating StartDate when loading from xml file
+    [XmlElement("CheckInDate")]
+    public DateTime CheckInDateSerialized
+    {
+        get => _checkInDate;
+        set => _checkInDate = value; //runs when loading the file, sets the field directly which fixes validation errors when loading
+    }
+    
+    //used to avoid validating StartDate when loading from xml file
+    [XmlIgnore]
     public DateTime CheckOutDate
     {
         get => _checkOutDate;
@@ -57,6 +70,14 @@ public class ReservationAccomodation
                 throw new ArgumentException("Check-out date cannot be earlier than Check-In-Date.");
             _checkOutDate = value;
         }
+    }
+    
+    //used to avoid validating StartDate when loading from xml file
+    [XmlElement("CheckOutDate")]
+    public DateTime CheckOutDateSerialized
+    {
+        get => _checkOutDate;
+        set => _checkOutDate = value; //runs when loading the file, sets the field directly which fixes validation errors when loading
     }
 
     public string ConditionBefore
