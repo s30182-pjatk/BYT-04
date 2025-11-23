@@ -123,6 +123,16 @@ public class Reservation
     {
         Status = newStatus;
     }
+
+    public override string ToString()
+    {
+        return $"ID: {ReservationId}\n" +
+               $"Start: {StartDate.ToShortDateString()}\n" +
+               $"End: {EndDate.ToShortDateString()}\n" +
+               $"Status: {Status}\n" +
+               $"Price: {TotalPrice}\n" +
+               "-----------------------------" ;
+    }
 }
 
 public static class ReservationExtent
@@ -189,14 +199,9 @@ public static class ReservationExtent
 
         foreach (var r in Reservations)
         {
-            Console.WriteLine(
-                $"ID: {r.ReservationId}\n" +
-                $"Start: {r.StartDate.ToShortDateString()}\n" +
-                $"End: {r.EndDate.ToShortDateString()}\n" +
-                $"Status: {r.Status}\n" +
-                $"Price: {r.TotalPrice}\n" +
-                "-----------------------------\n"
-            );
+            Console.WriteLine(r);
         }
     }
+    
+    
 }

@@ -42,9 +42,72 @@ public class ReservationTest
     [Test]
     public void TestReservationChangeStatus_ShouldUpdateStatus()
     {
-        var reservation = new Reservation { Status = ReservationStatus.Pending };
-        reservation.ChangeReservationStatus(ReservationStatus.Cancelled);
-        Assert.That(reservation.Status, Is.EqualTo(ReservationStatus.Cancelled));
+        var reservation = new Reservation { Status = ReservationStatus.Confirmed };
+        reservation.ChangeReservationStatus(ReservationStatus.Completed);
+        Assert.That(reservation.Status, Is.EqualTo(ReservationStatus.Completed));
+    }
+
+    [Test]
+    public void TestReservationCheckPendingReservations()
+    {
+        // -- Arrange --
+        var tempDir = Path.Combine(Path.GetTempPath(), "persistence");
+        ReservationExtent.SetDirectory(tempDir);
+        ReservationExtent.Reservations.Clear();
+        
+        var r1 = new Reservation(1, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
+        var r2 = new Reservation(2, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
+        var r3 = new Reservation(3, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Completed, 100m);
+
+        ReservationExtent.Reservations.Add(r1);
+        ReservationExtent.Reservations.Add(r2);
+        ReservationExtent.Reservations.Add(r3);
+        
+        // -- Act --
+        ReservationExtent.Save();             // Writes to XML
+        ReservationExtent.Reservations.Clear(); // Clear memory
+        ReservationExtent.Load();             // Reads back from XML
+        
+        var pendingList = ReservationExtent.CheckPendingReservations();
+
+        // --- Assert ---
+        Assert.That(ReservationExtent.Reservations.Count, Is.EqualTo(3), "Should have loaded all 3 reservations.");
+        Assert.That(pendingList.Count, Is.EqualTo(2), "Should filter down to 2 pending reservations.");
+        
+        // --- Cleanup ---
+        if(Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+    }
+    
+    [Test]
+    public void TestReservationRemoveCompletedReservations()
+    {
+        // -- Arrange --
+        var tempDir = Path.Combine(Path.GetTempPath(), "persistence");
+        ReservationExtent.SetDirectory(tempDir);
+        ReservationExtent.Reservations.Clear();
+        
+        
+        
+        var r1 = new Reservation(1, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
+        r1.ChangeReservationStatus(ReservationStatus.Completed);
+        
+        var r2 = new Reservation(2, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
+        r2.ChangeReservationStatus(ReservationStatus.Completed);
+        
+        var r3 = new Reservation(3, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
+        
+        ReservationExtent.Reservations.Add(r1);
+        ReservationExtent.Reservations.Add(r2);
+        ReservationExtent.Reservations.Add(r3);
+        
+        // -- Act --
+        ReservationExtent.Save();             // Writes to XML
+        ReservationExtent.Reservations.Clear(); // Clear memory
+        ReservationExtent.Load();             // Reads back from XML
+        
+        Assert.That(ReservationExtent.Reservations.Count, Is.EqualTo(3), "Extent should contain exactly 3 loaded item before deletion of completed reservations.");
+        ReservationExtent.RemoveCompletedReservations();
+        Assert.That(ReservationExtent.Reservations.Count, Is.EqualTo(1), "Extent should contain exactly 1 loaded item before deletion of completed reservations.");
     }
     
     [Test]
