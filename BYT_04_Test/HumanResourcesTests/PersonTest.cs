@@ -1,4 +1,7 @@
 ﻿using BYT_04;
+using NUnit.Framework;
+using System.IO;
+using System.Linq;
 
 namespace BYT_04_Test;
 
@@ -8,9 +11,11 @@ public class PersonTests
     public void TestPersonInvalidDate()
     {
         var invalidDate = DateTime.Today.AddDays(1);
-
         var address = new Address("some", "another", "dom", "somecode", "someplace");
-        Assert.Throws<ArgumentException>(() => new Person("Gleb", null, "Denisov", invalidDate, "male", "+48999999999", "email@gmail.com", address));
+
+        Assert.Throws<ArgumentException>(() =>
+            new Person("Gleb", null, "Denisov", invalidDate, "male",
+                "+48999999999", "email@gmail.com", address));
     }
     
     [Test]
@@ -19,17 +24,25 @@ public class PersonTests
         DateTime date1 = new DateTime(2015, 8, 28);
 
         var address = new Address("some", "another", "dom", "somecode", "someplace");
-        var person = new Person("Gleb", null, "Denisov", date1, "male", "+48999999999", "email@gmail.com", address);
+        var person = new Person("Gleb", null, "Denisov", date1,
+            "male", "+48999999999", "email@gmail.com", address);
         
         Assert.That(person.GetAge(), Is.EqualTo(10));
     }
-    
+
+    //====================================================================
+    // 1) Save test – writes XML only
+    //====================================================================
     [Test]
-    public void SaveAndLoadPerson_WritesAndReadsCorrectly()
+    public void SavePerson_WritesCorrectly()
     {
-        // --- Arrange ---
-        // Clear in-memory extent before test
-        var tempDir = Path.Combine(Path.GetTempPath(), "persistence");
+        // Arrange
+        var tempDir = Path.Combine(Path.GetTempPath(), "person_persistence_tests");
+        var xmlFile = Path.Combine(tempDir, "persons.xml");
+
+        if (Directory.Exists(tempDir))
+            Directory.Delete(tempDir, true);
+
         PersonExtent.SetDirectory(tempDir);
         PersonExtent.Persons.Clear();
 
@@ -44,14 +57,36 @@ public class PersonTests
 
         PersonExtent.Persons.Add(person);
 
-        // --- Act ---
-        PersonExtent.Save();   // Writes XML
-        PersonExtent.Persons.Clear(); // CLEAR memory to ensure we ONLY load from XML
-        PersonExtent.Load();   // Reads XML
-        
-        PersonExtent.DisplayAll();
-        
-        // --- Assert ---
+        // Act
+        PersonExtent.Save();
+
+        // Assert
+        Assert.That(File.Exists(xmlFile), Is.True,
+            "XML file should exist after Save().");
+    }
+
+    //====================================================================
+    // 2) Load test – reads XML only
+    //====================================================================
+    [Test]
+    public void LoadPerson_ReadsCorrectly()
+    {
+        // Arrange
+        var tempDir = Path.Combine(Path.GetTempPath(), "person_persistence_tests");
+        var xmlFile = Path.Combine(tempDir, "persons.xml");
+
+        PersonExtent.SetDirectory(tempDir);
+
+        // Ensure XML exists (if this test runs alone)
+        if (!File.Exists(xmlFile))
+            SavePerson_WritesCorrectly();
+
+        PersonExtent.Persons.Clear();
+
+        // Act
+        PersonExtent.Load();
+
+        // Assert
         Assert.That(PersonExtent.Persons.Count, Is.EqualTo(1));
 
         var loaded = PersonExtent.Persons.First();
