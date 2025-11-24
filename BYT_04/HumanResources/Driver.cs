@@ -1,0 +1,137 @@
+namespace BYT_04;
+
+using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
+using System.IO;
+
+[Serializable]
+public class Driver : Person
+{
+    private string _licenseNumber = null!;
+    private DateTime _licenseExpiry;
+
+    public string LicenseNumber
+    {
+        get => _licenseNumber;
+        set => _licenseNumber = string.IsNullOrWhiteSpace(value)
+            ? throw new ArgumentException("License number cannot be empty.")
+            : value;
+    }
+
+    public DateTime LicenseExpiry
+    {
+        get => _licenseExpiry;
+        set
+        {
+            if (value < DateTime.Today)
+                throw new ArgumentException("License expiry date cannot be in the past.");
+            _licenseExpiry = value;
+        }
+    }
+
+    public Driver() : base() { }
+
+    public Driver(
+        string name,
+        string? middleName,
+        string surname,
+        DateTime birthDate,
+        string gender,
+        string phoneNumber,
+        string email,
+        Address address,
+        string licenseNumber,
+        DateTime licenseExpiry
+    ) : base(name, middleName, surname, birthDate, gender, phoneNumber, email, address)
+    {
+        LicenseNumber = licenseNumber;
+        LicenseExpiry = licenseExpiry;
+    }
+
+    public bool IsLicenseValid() => LicenseExpiry >= DateTime.Today;
+}
+
+
+// ============================================================
+//                         DRIVER EXTENT
+// ============================================================
+
+public static class DriverExtent
+{
+    private static string _directoryPath =
+        Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..", "..", "..",
+            "HumanResources", "persistence"
+        ));
+
+    private static string FilePath => Path.Combine(_directoryPath, "drivers.xml");
+
+    public static List<Driver> Drivers { get; private set; } = new();
+
+
+    public static void SetDirectory(string newDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(newDirectory))
+            throw new ArgumentException("Directory path cannot be null or empty.");
+
+        _directoryPath = newDirectory;
+    }
+
+
+    public static void Save()
+    {
+        Console.WriteLine("Saving drivers to: " + FilePath);
+
+        if (!Directory.Exists(_directoryPath))
+            Directory.CreateDirectory(_directoryPath);
+
+        XmlSerializer serializer = new(typeof(List<Driver>));
+        using FileStream fs = new(FilePath, FileMode.Create);
+        serializer.Serialize(fs, Drivers);
+    }
+
+
+    public static void Load()
+    {
+        Console.WriteLine("Loading drivers from: " + FilePath);
+
+        if (!File.Exists(FilePath))
+            return;
+
+        XmlSerializer serializer = new(typeof(List<Driver>));
+        using FileStream fs = new(FilePath, FileMode.Open);
+
+        if (serializer.Deserialize(fs) is List<Driver> loaded)
+            Drivers = loaded;
+    }
+
+
+    public static void DisplayAll()
+    {
+        if (Drivers.Count == 0)
+        {
+            Console.WriteLine("No drivers found.");
+            return;
+        }
+
+        Console.WriteLine("\n--- Loaded Drivers ---\n");
+
+        foreach (var d in Drivers)
+        {
+            Console.WriteLine(
+                $"Name: {d.Name} {d.MiddleName} {d.Surname}\n" +
+                $"Birth Date: {d.BirthDate.ToShortDateString()}\n" +
+                $"Gender: {d.Gender}\n" +
+                $"Phone: {d.PhoneNumber}\n" +
+                $"Email: {d.Email}\n" +
+                $"Address: {d.Address.Street}, {d.Address.City}, {d.Address.State}, {d.Address.PostalCode}, {d.Address.Country}\n" +
+                $"License Number: {d.LicenseNumber}\n" +
+                $"License Expiry: {d.LicenseExpiry.ToShortDateString()}\n" +
+                $"License Valid: {(d.IsLicenseValid() ? "Yes" : "No")}\n" +
+                "-----------------------------\n"
+            );
+        }
+    }
+}
