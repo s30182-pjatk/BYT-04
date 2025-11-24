@@ -30,7 +30,7 @@ public class Program
         
         //RESERVATIONS
         // Load existing reservations
-        ReservationExtent.Load();
+        Reservation.Load();
         
         var reservation = new Reservation(
             1,
@@ -40,13 +40,9 @@ public class Program
             105
         );
         
-        ReservationExtent.Reservations.Add(reservation);
+        Reservation.Save();
         
-        //Save to XML
-        ReservationExtent.Save();
-        
-        //Display loaded reservations
-        ReservationExtent.DisplayAll();
+        Reservation.DisplayAll();
         
         //-------------------------------------------------------------------------------------------------------
         
