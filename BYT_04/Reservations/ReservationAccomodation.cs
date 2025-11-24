@@ -1,6 +1,7 @@
 using System.Xml.Serialization;
-
+using BYT_04.Utility;
 namespace BYT_04.Reservations;
+
 
 [Serializable]
 public class ReservationAccomodation
@@ -83,7 +84,7 @@ public class ReservationAccomodation
     public string ConditionBefore
     {
         get => _conditionBefore;
-        set => _conditionBefore = ValidateRequiredString(value, nameof(ConditionBefore));
+        set => _conditionBefore = value.ValidateRequiredString(nameof(ConditionBefore));
     }
 
     public string? ConditionAfter
@@ -118,15 +119,6 @@ public class ReservationAccomodation
         ConditionBefore = conditionBefore;
         ConditionAfter = conditionAfter;
         Notes = notes;
-    }
-    
-    
-    private static string ValidateRequiredString(string value, string propertyName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"{propertyName} cannot be null, empty, or whitespace.");
-
-        return value;
     }
 
     public override string ToString()

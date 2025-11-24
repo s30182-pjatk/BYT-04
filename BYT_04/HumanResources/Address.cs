@@ -1,5 +1,5 @@
 using System;
-
+using BYT_04.Utility;
 namespace BYT_04
 {
     [Serializable]
@@ -14,31 +14,31 @@ namespace BYT_04
         public string Street
         {
             get => _street;
-            set => _street = ValidateRequiredString(value, nameof(Street));
+            set => _street = value.ValidateRequiredString(nameof(Street));
         }
 
         public string City
         {
             get => _city;
-            set => _city = ValidateRequiredString(value, nameof(City));
+            set => _city = value.ValidateRequiredString(nameof(City));
         }
 
         public string State
         {
             get => _state;
-            set => _state = ValidateRequiredString(value, nameof(State));
+            set => _state = value.ValidateRequiredString(nameof(State));
         }
 
         public string PostalCode
         {
             get => _postalCode;
-            set => _postalCode = ValidateRequiredString(value, nameof(PostalCode));
+            set => _postalCode = value.ValidateRequiredString(nameof(PostalCode));
         }
 
         public string Country
         {
             get => _country;
-            set => _country = ValidateRequiredString(value, nameof(Country));
+            set => _country = value.ValidateRequiredString(nameof(Country));
         }
 
         public Address() { }
@@ -52,11 +52,5 @@ namespace BYT_04
             Country = country;
         }
 
-        private static string ValidateRequiredString(string value, string propertyName)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException($"{propertyName} cannot be null, empty, or whitespace.");
-            return value;
-        }
     }
 }

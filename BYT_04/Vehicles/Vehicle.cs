@@ -1,3 +1,5 @@
+using BYT_04.Utility;
+
 namespace BYT_04.Vehicles;
 
 [Serializable]
@@ -11,7 +13,7 @@ public class Vehicle
     public string PlateNumber
     {
         get => _plateNumber;
-       
+        set => value.ValidateRequiredString(nameof(_plateNumber));
     }
     
 }

@@ -1,4 +1,5 @@
 ﻿namespace BYT_04;
+using BYT_04.Utility;
 
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ public class Person
     public string Name
     {
         get => _name;
-        set => _name = ValidateRequiredString(value, nameof(Name));
+        set => _name = value.ValidateRequiredString(nameof(Name));
     }
 
     public string? MiddleName
@@ -33,7 +34,7 @@ public class Person
     public string Surname
     {
         get => _surname;
-        set => _surname = ValidateRequiredString(value, nameof(Surname));
+        set => _surname = value.ValidateRequiredString(nameof(Surname));
     }
 
     public DateTime BirthDate
@@ -50,19 +51,19 @@ public class Person
     public string Gender
     {
         get => _gender;
-        set => _gender = ValidateRequiredString(value, nameof(Gender));
+        set => _gender = value.ValidateRequiredString(nameof(Gender));
     }
 
     public string PhoneNumber
     {
         get => _phoneNumber;
-        set => _phoneNumber = ValidateRequiredString(value, nameof(PhoneNumber));
+        set => _phoneNumber = value.ValidateRequiredString(nameof(PhoneNumber));
     }
 
     public string Email
     {
         get => _email;
-        set => _email = ValidateRequiredString(value, nameof(Email));
+        set => _email = value.ValidateRequiredString(nameof(Email));
     }
 
     public Address Address
@@ -101,14 +102,6 @@ public class Person
         if (BirthDate.Date > today.AddYears(-age))
             age--;
         return age;
-    }
-
-    private static string ValidateRequiredString(string value, string propertyName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"{propertyName} cannot be null, empty, or whitespace.");
-
-        return value;
     }
 }
 
