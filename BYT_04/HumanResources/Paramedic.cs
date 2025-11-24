@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
+using BYT_04.Utility;
 
 [Serializable]
 public class Paramedic : Person
@@ -13,12 +14,7 @@ public class Paramedic : Person
     public string CPRCertificationNumber
     {
         get => _cprCertificationNumber;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("CPR Certification Number cannot be empty.");
-            _cprCertificationNumber = value;
-        }
+        set => value.ValidateRequiredString("CPR Certificate Number");
     }
 
     public Paramedic() : base() { }

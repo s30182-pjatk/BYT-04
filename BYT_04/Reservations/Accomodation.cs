@@ -1,5 +1,5 @@
 using System.Xml.Serialization;
-
+using BYT_04.Utility;
 namespace BYT_04.Reservations;
 public enum AccomodationType
 {
@@ -21,7 +21,7 @@ public class Accomodation
     public string Number
     {
         get => _number;
-        set => _number = ValidateRequiredString(value, nameof(Number));
+        set => _number = value.ValidateRequiredString(nameof(Number));
     }
     
     public AccomodationType Type
@@ -59,14 +59,6 @@ public class Accomodation
             throw new ArgumentException("Accomodation cannot be null.");
         }
         _accomodations.Add(accomodation);
-    }
-    
-    private static string ValidateRequiredString(string value, string propertyName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"{propertyName} cannot be null, empty, or whitespace.");
-
-        return value;
     }
 
     public override string ToString()

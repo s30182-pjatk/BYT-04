@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
+using BYT_04.Utility;
 
 [Serializable]
 public class Driver : Person
@@ -14,9 +15,7 @@ public class Driver : Person
     public string LicenseNumber
     {
         get => _licenseNumber;
-        set => _licenseNumber = string.IsNullOrWhiteSpace(value)
-            ? throw new ArgumentException("License number cannot be empty.")
-            : value;
+        set => value.ValidateRequiredString(nameof(LicenseNumber));
     }
 
     public DateTime LicenseExpiry

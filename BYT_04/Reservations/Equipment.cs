@@ -1,5 +1,5 @@
 using System.Xml.Serialization;
-
+using BYT_04.Utility;
 namespace BYT_04.Reservations
 {
     [Serializable]
@@ -11,7 +11,7 @@ namespace BYT_04.Reservations
         public string Name
         {
             get => _name;
-            set => _name = ValidateRequiredString(value, nameof(Name));
+            set => _name = value.ValidateRequiredString(nameof(Name));
         }
 
         public DateTime LastMaintenanceDate
@@ -31,14 +31,6 @@ namespace BYT_04.Reservations
         {
             Name = name;
             LastMaintenanceDate = lastMaintenanceDate;
-        }
-
-        private static string ValidateRequiredString(string value, string propertyName)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException($"{propertyName} cannot be null, empty, or whitespace.");
-
-            return value;
         }
 
         public override string ToString()
