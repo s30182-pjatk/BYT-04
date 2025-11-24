@@ -28,13 +28,12 @@ namespace BYT_04.Tests.Reservations
             Assert.That(Equipment.Equipments.Last(), Is.SameAs(equipment));
         }
 
-     
+
         [TestCase("")]
         [TestCase("   ")]
         public void Constructor_WithInvalidName_Throws(string invalidName)
         {
             var date = DateTime.Today.AddDays(-1);
-
             Assert.Throws<ArgumentException>(() => new Equipment(invalidName!, date));
         }
 
@@ -42,18 +41,14 @@ namespace BYT_04.Tests.Reservations
         public void LastMaintenanceDate_InFuture_Throws()
         {
             var future = DateTime.Today.AddDays(1);
-
             Assert.Throws<ArgumentException>(() => new Equipment("Helmet", future));
         }
 
         [Test]
         public void EquipmentsExtent_IsReadOnlyFromOutside()
         {
-            var eq = new Equipment("Boots " + Guid.NewGuid().ToString("N"),
-                                   DateTime.Today.AddDays(-2));
-
+            var eq = new Equipment("Boots " + Guid.NewGuid().ToString("N"), DateTime.Today.AddDays(-2));
             var extent = Equipment.Equipments;
-
             Assert.Throws<NotSupportedException>(() =>
             {
                 var collection = (ICollection<Equipment>)extent;
@@ -67,9 +62,7 @@ namespace BYT_04.Tests.Reservations
             // arrange
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             Equipment.SetDirectory(tempDir);
-
-            _ = new Equipment("Goggles " + Guid.NewGuid().ToString("N"),
-                              DateTime.Today.AddDays(-5));
+            _ = new Equipment("Goggles " + Guid.NewGuid().ToString("N"), DateTime.Today.AddDays(-5));
 
             var before = Equipment.Equipments
                 .Select(e => new { e.Name, e.LastMaintenanceDate })
@@ -95,8 +88,7 @@ namespace BYT_04.Tests.Reservations
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             Equipment.SetDirectory(tempDir);
 
-            _ = new Equipment("Backpack " + Guid.NewGuid().ToString("N"),
-                              DateTime.Today.AddDays(-7));
+            _ = new Equipment("Backpack " + Guid.NewGuid().ToString("N"), DateTime.Today.AddDays(-7));
 
             // act
             Equipment.Save();

@@ -49,8 +49,7 @@ namespace BYT_04.Tests.Reservations
         {
             var eq = CreateSampleEquipment();
 
-            Assert.Throws<ArgumentException>(() =>
-                new TripEquipment(null!, eq, 1));
+            Assert.Throws<ArgumentException>(() => new TripEquipment(null!, eq, 1));
         }
 
         [Test]
@@ -58,8 +57,7 @@ namespace BYT_04.Tests.Reservations
         {
             var trip = CreateSampleTrip();
 
-            Assert.Throws<ArgumentException>(() =>
-                new TripEquipment(trip, null!, 1));
+            Assert.Throws<ArgumentException>(() => new TripEquipment(trip, null!, 1));
         }
 
         [TestCase(0)]
@@ -69,8 +67,7 @@ namespace BYT_04.Tests.Reservations
             var trip = CreateSampleTrip();
             var eq = CreateSampleEquipment();
 
-            Assert.Throws<ArgumentException>(() =>
-                new TripEquipment(trip, eq, qty));
+            Assert.Throws<ArgumentException>(() => new TripEquipment(trip, eq, qty));
         }
 
         [Test]

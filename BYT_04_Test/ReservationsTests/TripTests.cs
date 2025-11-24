@@ -80,8 +80,7 @@ namespace BYT_04.Tests.Reservations
             var start = DateTime.Today.AddDays(-1);
             var end = DateTime.Today.AddDays(3);
 
-            Assert.Throws<ArgumentException>(() =>
-                new Trip("Trip", "Alps", start, end, 1000m));
+            Assert.Throws<ArgumentException>(() => new Trip("Trip", "Alps", start, end, 1000m));
         }
 
         [Test]
@@ -90,8 +89,7 @@ namespace BYT_04.Tests.Reservations
             var start = DateTime.Today.AddDays(10);
             var end = start.AddDays(-1);
 
-            Assert.Throws<ArgumentException>(() =>
-                new Trip("Trip", "Alps", start, end, 1000m));
+            Assert.Throws<ArgumentException>(() => new Trip("Trip", "Alps", start, end, 1000m));
         }
 
         [Test]
@@ -100,8 +98,7 @@ namespace BYT_04.Tests.Reservations
             var start = DateTime.Today.AddDays(10);
             var end = start.AddDays(2);
 
-            Assert.Throws<ArgumentException>(() =>
-                new Trip("Trip", "Alps", start, end, -1m));
+            Assert.Throws<ArgumentException>(() => new Trip("Trip", "Alps", start, end, -1m));
         }
 
         [Test]
@@ -121,8 +118,7 @@ namespace BYT_04.Tests.Reservations
         {
             var start = DateTime.Today.AddDays(6);
             var end = start.AddDays(3);
-            var trip = new Trip("Extent Test " + Guid.NewGuid().ToString("N"),
-                                "Tatras", start, end, 500m);
+            var trip = new Trip("Extent Test " + Guid.NewGuid().ToString("N"), "Tatras", start, end, 500m);
 
             var extent = Trip.Trips;
 
@@ -142,8 +138,7 @@ namespace BYT_04.Tests.Reservations
 
             var start = DateTime.Today.AddDays(8);
             var end = start.AddDays(4);
-            _ = new Trip("Persist Trip " + Guid.NewGuid().ToString("N"),
-                         "Dolomites", start, end, 800m);
+            _ = new Trip("Persist Trip " + Guid.NewGuid().ToString("N"), "Dolomites", start, end, 800m);
 
             var before = Trip.Trips
                 .Select(t => new
@@ -186,8 +181,7 @@ namespace BYT_04.Tests.Reservations
 
             var start = DateTime.Today.AddDays(5);
             var end = start.AddDays(3);
-            _ = new Trip("File Trip " + Guid.NewGuid().ToString("N"),
-                         "Alps", start, end, 1000m);
+            _ = new Trip("File Trip " + Guid.NewGuid().ToString("N"), "Alps", start, end, 1000m);
 
             Trip.Save();
 
