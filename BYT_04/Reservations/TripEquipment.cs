@@ -8,20 +8,22 @@ namespace BYT_04.Reservations;
 [Serializable]
 public class TripEquipment
 {
-    [XmlIgnore] private Trip _trip = null!;
+    // --------- Extent ----------
+    private static readonly List<TripEquipment> _tripEquipments = new();
+    public static IReadOnlyList<TripEquipment> TripEquipments => _tripEquipments.AsReadOnly();
 
-    [XmlIgnore] private Equipment _equipment = null!;
+    private static string _directoryPath =
+        Path.GetFullPath(
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
 
+    private static string FilePath => Path.Combine(_directoryPath, "tripequipment.xml");
+
+  
+    private Trip _trip = null!;
+    private Equipment _equipment = null!;
     private int _quantity;
     private string? _notes;
 
-    // -------- extent properties --------
-    public static List<TripEquipment> TripEquipments { get; private set; } = new();
-
-    private static string _directoryPath =
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
-
-    private static string FilePath => Path.Combine(_directoryPath, "tripequipment.xml");
 
     public Trip Trip
     {
@@ -46,16 +48,14 @@ public class TripEquipment
         }
     }
 
-
+ 
     public string? Notes
     {
         get => _notes;
         set => _notes = string.IsNullOrWhiteSpace(value) ? null : value;
     }
-
-    public TripEquipment()
-    {
-    }
+    
+    public TripEquipment() { }
 
     public TripEquipment(Trip trip, Equipment equipment, int quantity, string? notes = null)
     {
@@ -64,10 +64,18 @@ public class TripEquipment
         Quantity = quantity;
         Notes = notes;
 
-        TripEquipments.Add(this);
+        AddTripEquipment(this);
     }
 
-    // -------- extent stuff --------
+    // --------- Extent stuff ----------
+    private static void AddTripEquipment(TripEquipment te)
+    {
+        if (te == null)
+            throw new ArgumentException("TripEquipment link cannot be null.");
+
+        _tripEquipments.Add(te);
+    }
+
     public static void SetDirectory(string newDirectory)
     {
         if (string.IsNullOrWhiteSpace(newDirectory))
@@ -78,54 +86,56 @@ public class TripEquipment
 
     public static void Save()
     {
-        Console.WriteLine("Saving to: " + FilePath);
+        Console.WriteLine("Saving trip-equipment links to: " + FilePath);
 
         if (!Directory.Exists(_directoryPath))
             Directory.CreateDirectory(_directoryPath);
 
         XmlSerializer serializer = new(typeof(List<TripEquipment>));
-
         using FileStream fs = new(FilePath, FileMode.Create);
-        serializer.Serialize(fs, TripEquipments);
+        serializer.Serialize(fs, _tripEquipments);
     }
 
     public static void Load()
     {
-        Console.WriteLine("Loading from: " + FilePath);
+        Console.WriteLine("Loading trip-equipment links from: " + FilePath);
 
         if (!File.Exists(FilePath))
             return;
 
         XmlSerializer serializer = new(typeof(List<TripEquipment>));
-
         using FileStream fs = new(FilePath, FileMode.Open);
 
         if (serializer.Deserialize(fs) is List<TripEquipment> loaded)
-            TripEquipments = loaded;
+        {
+            _tripEquipments.Clear();
+            _tripEquipments.AddRange(loaded);
+        }
     }
 
     public static void DisplayAll()
     {
-        if (TripEquipments.Count == 0)
+        if (_tripEquipments.Count == 0)
         {
             Console.WriteLine("No trip-equipment links found.");
             return;
         }
 
-        Console.WriteLine("\n--- Loaded Trip-Equipment ---\n");
+        Console.WriteLine("\n--- Loaded Trip-Equipment Links ---\n");
 
-        foreach (var te in TripEquipments)
+        foreach (var te in _tripEquipments)
+        {
             Console.WriteLine(te);
+        }
     }
 
+    
     public override string ToString()
     {
-        return
-            $"Trip: {Trip.Name}\n" +
-            $"Destination: {Trip.Destination}\n" +
-            $"Equipment: {Equipment.Name}\n" +
-            $"Quantity: {Quantity}\n" +
-            $"Notes: {Notes ?? "N/A"}\n" +
-            "-----------------------------\n";
+        return $"Trip: {Trip.Name} ({Trip.Destination})\n" +
+               $"Equipment: {Equipment.Name}\n" +
+               $"Quantity: {Quantity}\n" +
+               $"Notes: {Notes ?? "N/A"}\n" +
+               "-----------------------------";
     }
 }

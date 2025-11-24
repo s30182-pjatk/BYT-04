@@ -9,6 +9,17 @@ namespace BYT_04.Reservations;
 [Serializable]
 public class Trip
 {
+    // --------- Extent ----------
+    private static readonly List<Trip> _trips = new();
+    public static IReadOnlyList<Trip> Trips => _trips.AsReadOnly();
+
+    private static string _directoryPath =
+        Path.GetFullPath(
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
+
+    private static string FilePath => Path.Combine(_directoryPath, "trips.xml");
+
+    
     private string _name = null!;
     private string _destination = null!;
     private string? _description;
@@ -16,14 +27,7 @@ public class Trip
     private DateTime _endDate;
     private decimal _pricePerPerson;
 
-    // -------- extent stuff --------
-    public static List<Trip> Trips { get; private set; } = new();
-
-    private static string _directoryPath =
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
-
-    private static string FilePath => Path.Combine(_directoryPath, "trip.xml");
-
+   
     public string Name
     {
         get => _name;
@@ -35,13 +39,15 @@ public class Trip
         get => _destination;
         set => _destination = value.ValidateRequiredString(nameof(Destination));
     }
-    
+
+   
     public string? Description
     {
         get => _description;
-        set => _description = string.IsNullOrWhiteSpace(value) ? null : value; // since its optional?
+        set => _description = string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
+    
     [XmlIgnore]
     public DateTime StartDate
     {
@@ -58,7 +64,7 @@ public class Trip
     public DateTime StartDateSerialized
     {
         get => _startDate;
-        set => _startDate = value;
+        set => _startDate = value;  
     }
 
     [XmlIgnore]
@@ -77,7 +83,7 @@ public class Trip
     public DateTime EndDateSerialized
     {
         get => _endDate;
-        set => _endDate = value;
+        set => _endDate = value;     
     }
 
     public decimal PricePerPerson
@@ -91,9 +97,7 @@ public class Trip
         }
     }
     
-    public Trip()
-    {
-    }
+    public Trip() { }
 
     public Trip(
         string name,
@@ -110,10 +114,18 @@ public class Trip
         PricePerPerson = pricePerPerson;
         Description = description;
 
-        Trips.Add(this);
+        AddTrip(this);
     }
 
-    // -------- extent methods --------
+    // --------- Extent stuff ----------
+    private static void AddTrip(Trip trip)
+    {
+        if (trip == null)
+            throw new ArgumentException("Trip cannot be null.");
+
+        _trips.Add(trip);
+    }
+
     public static void SetDirectory(string newDirectory)
     {
         if (string.IsNullOrWhiteSpace(newDirectory))
@@ -124,35 +136,36 @@ public class Trip
 
     public static void Save()
     {
-        Console.WriteLine("Saving to: " + FilePath);
+        Console.WriteLine("Saving trips to: " + FilePath);
 
         if (!Directory.Exists(_directoryPath))
             Directory.CreateDirectory(_directoryPath);
 
         XmlSerializer serializer = new(typeof(List<Trip>));
-
         using FileStream fs = new(FilePath, FileMode.Create);
-        serializer.Serialize(fs, Trips);
+        serializer.Serialize(fs, _trips);
     }
 
     public static void Load()
     {
-        Console.WriteLine("Loading from: " + FilePath);
+        Console.WriteLine("Loading trips from: " + FilePath);
 
         if (!File.Exists(FilePath))
             return;
 
         XmlSerializer serializer = new(typeof(List<Trip>));
-
         using FileStream fs = new(FilePath, FileMode.Open);
 
         if (serializer.Deserialize(fs) is List<Trip> loaded)
-            Trips = loaded;
+        {
+            _trips.Clear();
+            _trips.AddRange(loaded);
+        }
     }
 
     public static void DisplayAll()
     {
-        if (Trips.Count == 0)
+        if (_trips.Count == 0)
         {
             Console.WriteLine("No trips found.");
             return;
@@ -160,19 +173,20 @@ public class Trip
 
         Console.WriteLine("\n--- Loaded Trips ---\n");
 
-        foreach (var t in Trips)
+        foreach (var t in _trips)
+        {
             Console.WriteLine(t);
+        }
     }
 
     public override string ToString()
     {
-        return
-            $"Name: {Name}\n" +
-            $"Destination: {Destination}\n" +
-            $"Start: {StartDate:d}\n" +
-            $"End: {EndDate:d}\n" +
-            $"Price per person: {PricePerPerson}\n" +
-            $"Description: {Description ?? "N/A"}\n" +
-            "-----------------------------\n";
+        return $"Name: {Name}\n" +
+               $"Destination: {Destination}\n" +
+               $"Start: {StartDate:yyyy-MM-dd}\n" +
+               $"End: {EndDate:yyyy-MM-dd}\n" +
+               $"Price per person: {PricePerPerson}\n" +
+               $"Description: {Description ?? "N/A"}\n" +
+               "-----------------------------";
     }
 }
