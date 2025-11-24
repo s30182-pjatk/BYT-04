@@ -13,6 +13,9 @@ public enum ReservationStatus
 [Serializable]
 public class Reservation
 {
+    private static readonly List<Reservation> _reservations = new(); 
+    public static IReadOnlyList<Reservation> Reservations => _reservations.AsReadOnly();
+    
     private int _reservationId;
     private DateTime _startDate;
     private DateTime _endDate;
@@ -103,6 +106,8 @@ public class Reservation
         EndDate = endDate;
         Status = status;
         TotalPrice = totalPrice;
+        
+        AddReservation(this);
     }
     
     // Methods
@@ -118,6 +123,24 @@ public class Reservation
         }
     }
     
+    private static void AddReservation(Reservation reservation)
+    {
+        if (reservation == null)
+        {
+            throw new ArgumentException("Reservation cannot be null");
+        }
+        _reservations.Add(reservation);
+    }
+    
+    public static List<Reservation> CheckPendingReservations()
+    {
+        return _reservations.FindAll(r => r.Status == ReservationStatus.Pending);
+    }
+    
+    public static void RemoveCompletedReservations()
+    {
+        _reservations.RemoveAll(r => r.Status == ReservationStatus.Completed);
+    }
     
     public void ChangeReservationStatus(ReservationStatus newStatus)
     {
@@ -133,11 +156,8 @@ public class Reservation
                $"Price: {TotalPrice}\n" +
                "-----------------------------" ;
     }
-}
-
-public static class ReservationExtent
-{
-    public static List<Reservation> Reservations { get; private set; } = new();
+    
+    //Persistence
     
     private static string _directoryPath =
         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
@@ -160,7 +180,7 @@ public static class ReservationExtent
 
         XmlSerializer serializer = new(typeof(List<Reservation>));
         using FileStream fs = new(FilePath, FileMode.Create);
-        serializer.Serialize(fs, Reservations);
+        serializer.Serialize(fs, _reservations);
     }
 
     public static void Load()
@@ -173,23 +193,19 @@ public static class ReservationExtent
         XmlSerializer serializer = new(typeof(List<Reservation>));
         using FileStream fs = new(FilePath, FileMode.Open);
 
-        if (serializer.Deserialize(fs) is List<Reservation> loaded)
-            Reservations = loaded;
-    }
+        var loaded = serializer.Deserialize(fs) as List<Reservation>;
 
-    public static List<Reservation> CheckPendingReservations()
-    {
-        return Reservations.FindAll(r => r.Status == ReservationStatus.Pending);
+        
+        if (loaded != null)
+        {
+            _reservations.Clear();
+            _reservations.AddRange(loaded);
+        }
     }
-
-    public static void RemoveCompletedReservations()
-    {
-        Reservations.RemoveAll(r => r.Status == ReservationStatus.Completed);
-    }
-
+    
     public static void DisplayAll()
     {
-        if (Reservations.Count == 0)
+        if (_reservations.Count == 0)
         {
             Console.WriteLine("No reservations found.");
             return;
@@ -197,11 +213,9 @@ public static class ReservationExtent
 
         Console.WriteLine("\n--- Loaded Reservations ---\n");
 
-        foreach (var r in Reservations)
+        foreach (var r in _reservations)
         {
             Console.WriteLine(r);
         }
     }
-    
-    
 }
