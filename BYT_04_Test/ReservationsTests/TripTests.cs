@@ -5,7 +5,7 @@ using System.Linq;
 using BYT_04.Reservations;
 using NUnit.Framework;
 
-namespace BYT_04.Tests.Reservations
+namespace BYT_04.Tests.ReservationsTests
 {
     [TestFixture]
     public class TripTests
@@ -20,7 +20,7 @@ namespace BYT_04.Tests.Reservations
 
             // act
             var trip = new Trip(
-                name: "Winter Camp " + Guid.NewGuid().ToString("N"),
+                name: "Winter Camp 1",
                 destination: "Alps",
                 startDate: start,
                 endDate: end,
@@ -40,7 +40,6 @@ namespace BYT_04.Tests.Reservations
             Assert.That(Trip.Trips.Last(), Is.SameAs(trip));
         }
 
-       
         [TestCase("")]
         [TestCase("   ")]
         public void Name_Invalid_Throws(string invalidName)
@@ -57,7 +56,6 @@ namespace BYT_04.Tests.Reservations
                     pricePerPerson: 1000m));
         }
 
-        
         [TestCase("")]
         [TestCase("   ")]
         public void Destination_Invalid_Throws(string invalidDestination)
@@ -118,7 +116,7 @@ namespace BYT_04.Tests.Reservations
         {
             var start = DateTime.Today.AddDays(6);
             var end = start.AddDays(3);
-            var trip = new Trip("Extent Test " + Guid.NewGuid().ToString("N"), "Tatras", start, end, 500m);
+            var trip = new Trip("Extent Test 1", "Tatras", start, end, 500m);
 
             var extent = Trip.Trips;
 
@@ -138,7 +136,7 @@ namespace BYT_04.Tests.Reservations
 
             var start = DateTime.Today.AddDays(8);
             var end = start.AddDays(4);
-            _ = new Trip("Persist Trip " + Guid.NewGuid().ToString("N"), "Dolomites", start, end, 800m);
+            _ = new Trip("Persist Trip 1", "Dolomites", start, end, 800m);
 
             var before = Trip.Trips
                 .Select(t => new
@@ -181,7 +179,7 @@ namespace BYT_04.Tests.Reservations
 
             var start = DateTime.Today.AddDays(5);
             var end = start.AddDays(3);
-            _ = new Trip("File Trip " + Guid.NewGuid().ToString("N"), "Alps", start, end, 1000m);
+            _ = new Trip("File Trip 1", "Alps", start, end, 1000m);
 
             Trip.Save();
 

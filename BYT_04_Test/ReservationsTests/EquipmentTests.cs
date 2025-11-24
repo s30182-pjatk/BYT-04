@@ -5,7 +5,7 @@ using System.Linq;
 using BYT_04.Reservations;
 using NUnit.Framework;
 
-namespace BYT_04.Tests.Reservations
+namespace BYT_04.Tests.ReservationsTests
 {
     [TestFixture]
     public class EquipmentTests
@@ -14,7 +14,7 @@ namespace BYT_04.Tests.Reservations
         public void Constructor_WithValidData_SetsPropertiesAndAddsToExtent()
         {
             // arrange
-            var name = "Ski poles " + Guid.NewGuid().ToString("N");
+            var name = "Ski poles 1";
             var date = DateTime.Today.AddDays(-3);
             var initialCount = Equipment.Equipments.Count;
 
@@ -27,7 +27,6 @@ namespace BYT_04.Tests.Reservations
             Assert.That(Equipment.Equipments.Count, Is.EqualTo(initialCount + 1));
             Assert.That(Equipment.Equipments.Last(), Is.SameAs(equipment));
         }
-
 
         [TestCase("")]
         [TestCase("   ")]
@@ -47,8 +46,9 @@ namespace BYT_04.Tests.Reservations
         [Test]
         public void EquipmentsExtent_IsReadOnlyFromOutside()
         {
-            var eq = new Equipment("Boots " + Guid.NewGuid().ToString("N"), DateTime.Today.AddDays(-2));
+            var eq = new Equipment("Boots 1", DateTime.Today.AddDays(-2));
             var extent = Equipment.Equipments;
+
             Assert.Throws<NotSupportedException>(() =>
             {
                 var collection = (ICollection<Equipment>)extent;
@@ -62,7 +62,8 @@ namespace BYT_04.Tests.Reservations
             // arrange
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             Equipment.SetDirectory(tempDir);
-            _ = new Equipment("Goggles " + Guid.NewGuid().ToString("N"), DateTime.Today.AddDays(-5));
+
+            _ = new Equipment("Goggles 1", DateTime.Today.AddDays(-5));
 
             var before = Equipment.Equipments
                 .Select(e => new { e.Name, e.LastMaintenanceDate })
@@ -88,7 +89,7 @@ namespace BYT_04.Tests.Reservations
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             Equipment.SetDirectory(tempDir);
 
-            _ = new Equipment("Backpack " + Guid.NewGuid().ToString("N"), DateTime.Today.AddDays(-7));
+            _ = new Equipment("Backpack 1", DateTime.Today.AddDays(-7));
 
             // act
             Equipment.Save();
