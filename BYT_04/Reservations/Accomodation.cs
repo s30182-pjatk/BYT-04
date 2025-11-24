@@ -10,6 +10,9 @@ public enum AccomodationType
 [Serializable]
 public class Accomodation
 {
+    private static readonly List<Accomodation> _accomodations = new();
+    public static IReadOnlyList<Accomodation> Accomodations => _accomodations.AsReadOnly();
+    
     private string _number = null!;
     private AccomodationType _type;
     private int _capacity;
@@ -45,6 +48,17 @@ public class Accomodation
         Number = number;
         Type = type;
         Capacity = capacity;
+        
+        AddAccomodation(this);
+    }
+
+    private static void AddAccomodation(Accomodation accomodation)
+    {
+        if (accomodation == null)
+        {
+            throw new ArgumentException("Accomodation cannot be null.");
+        }
+        _accomodations.Add(accomodation);
     }
     
     private static string ValidateRequiredString(string value, string propertyName)
@@ -62,11 +76,8 @@ public class Accomodation
                $"Capacity: {Capacity}\n" +
                "-----------------------------";
     }
-}
-
-public static class AccomodationExtent
-{ 
-    public static List<Accomodation> Accomodations { get; private set; } = new();
+    
+    //Persistence
     
     private static string _directoryPath =
         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
@@ -91,7 +102,7 @@ public static class AccomodationExtent
         XmlSerializer serializer = new(typeof(List<Accomodation>));
 
         using FileStream fs = new(FilePath, FileMode.Create);
-        serializer.Serialize(fs, Accomodations);
+        serializer.Serialize(fs, _accomodations);
     }
 
     public static void Load()
@@ -105,13 +116,19 @@ public static class AccomodationExtent
 
         using FileStream fs = new(FilePath, FileMode.Open);
 
-        if (serializer.Deserialize(fs) is List<Accomodation> loaded)
-            Accomodations = loaded;
+        var loaded = serializer.Deserialize(fs) as List<Accomodation>;
+
+        
+        if (loaded != null)
+        {
+            _accomodations.Clear();
+            _accomodations.AddRange(loaded);
+        }
     }
 
     public static void DisplayAll()
     {
-        if (Accomodations.Count == 0)
+        if (_accomodations.Count == 0)
         {
             Console.WriteLine("No Accomodations found.");
             return;
@@ -119,9 +136,10 @@ public static class AccomodationExtent
 
         Console.WriteLine("\n--- Loaded Accomodations ---\n");
 
-        foreach (var a in Accomodations)
+        foreach (var a in _accomodations)
         {
             Console.WriteLine(a);
         }
     }
 }
+

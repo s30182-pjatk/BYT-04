@@ -47,41 +47,39 @@ public class Program
         //-------------------------------------------------------------------------------------------------------
         
         //ACCOMODATIONS
-        AccomodationExtent.Load();
-
+        Accomodation.Load();
+        
         var accomodation = new Accomodation(
             "A160",
             AccomodationType.Room,
             7);
         
-        AccomodationExtent.Accomodations.Add(accomodation);
-        
         //Save to XML
-        AccomodationExtent.Save();
+        Accomodation.Save();
         
         //Display loaded Accomodations
-        AccomodationExtent.DisplayAll();
+        Accomodation.DisplayAll();
         
-        
-        //-------------------------------------------------------------------------------------------------------------
-    
-        //ReservationAccomodation
-        ReservationAccomodationExtent.Load();
 
-        var reservationaccomodation = new ReservationAccomodation(
-            reservation,
-            accomodation,
-            5,
-            DateTime.Today, 
-            DateTime.Today.AddDays(7),
-            "Good",
-            notes: "Heater needs to be fixed"
-        );
-        
-        ReservationAccomodationExtent.ReservationAccomodations.Add(reservationaccomodation);
-        
-        ReservationAccomodationExtent.Save();
-        ReservationAccomodationExtent.DisplayAll();
+        //-------------------------------------------------------------------------------------------------------------
+
+        //ReservationAccomodation
+        // ReservationAccomodationExtent.Load();
+        //
+        // var reservationaccomodation = new ReservationAccomodation(
+        //     reservation,
+        //     accomodation,
+        //     5,
+        //     DateTime.Today, 
+        //     DateTime.Today.AddDays(7),
+        //     "Good",
+        //     notes: "Heater needs to be fixed"
+        // );
+        //
+        // ReservationAccomodationExtent.ReservationAccomodations.Add(reservationaccomodation);
+        //
+        // ReservationAccomodationExtent.Save();
+        // ReservationAccomodationExtent.DisplayAll();
     }
     
     
