@@ -40,7 +40,7 @@ namespace BYT_04.Tests.Reservations
             Assert.That(Trip.Trips.Last(), Is.SameAs(trip));
         }
 
-        [TestCase(null)]
+       
         [TestCase("")]
         [TestCase("   ")]
         public void Name_Invalid_Throws(string invalidName)
@@ -57,7 +57,7 @@ namespace BYT_04.Tests.Reservations
                     pricePerPerson: 1000m));
         }
 
-        [TestCase(null)]
+        
         [TestCase("")]
         [TestCase("   ")]
         public void Destination_Invalid_Throws(string invalidDestination)

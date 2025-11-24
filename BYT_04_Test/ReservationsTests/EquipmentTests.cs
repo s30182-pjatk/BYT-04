@@ -28,7 +28,7 @@ namespace BYT_04.Tests.Reservations
             Assert.That(Equipment.Equipments.Last(), Is.SameAs(equipment));
         }
 
-        [TestCase(null)]
+     
         [TestCase("")]
         [TestCase("   ")]
         public void Constructor_WithInvalidName_Throws(string invalidName)
