@@ -1,9 +1,66 @@
-﻿using BYT_04.Reservations;
+﻿using System.Reflection;
+using BYT_04.Reservations;
 
 namespace BYT_04_Test.ReservationsTests;
 
+[TestFixture]
 public class AccomodationTest
 {
+    private string _tempDir;
+    private string _xmlFile;
+
+    [SetUp]
+    public void Setup()
+    {
+        _tempDir = Path.Combine(Path.GetTempPath(), "accomodation_persistence_tests");
+        _xmlFile = Path.Combine(_tempDir, "accomodations.xml");
+        
+        if (Directory.Exists(_tempDir))
+            Directory.Delete(_tempDir, true);
+        
+        Directory.CreateDirectory(_tempDir);
+        
+        Accomodation.SetDirectory(_tempDir);
+        
+        // Prevent data bleeding between tests
+        ClearAllExtents();
+    }
+
+    [TearDown]
+    public void Cleanup()
+    {
+        // Clean up files after every test
+        if (Directory.Exists(_tempDir)) 
+            Directory.Delete(_tempDir, true);
+        
+        ClearAllExtents();
+    }
+    
+    private void ClearAllExtents()
+    {
+        //Helper to clear static lists via reflection
+        ClearStaticList<Accomodation>("_accomodations");
+    }
+
+    private void ClearStaticList<T>(string fieldName)
+    {
+        var type = typeof(T);
+        var field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+        var prop = type.GetProperty(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+
+        object? listObject = null;
+
+        if (field != null) listObject = field.GetValue(null);
+        else if (prop != null) listObject = prop.GetValue(null);
+
+        if (listObject != null && listObject is System.Collections.IList list)
+        {
+            list.Clear();
+        }
+    }
+    
+    //Logic Tests
+    
     [Test]
     public void TestAccomodationCorrectCapacity()
     {
@@ -17,51 +74,55 @@ public class AccomodationTest
     {
         int invalidcapacity = -4;
         Assert.Throws<ArgumentException>(() => new Accomodation { Capacity = invalidcapacity });
-        
     }
 
     [Test]
     public void TestAccomodationCorrectAccomodationType()
     {
-        var accomodation = new Accomodation { Type = AccomodationType.Cabin};
-        
+        var accomodation = new Accomodation { Type = AccomodationType.Cabin };
         Assert.That(accomodation.Type, Is.EqualTo(AccomodationType.Cabin));
     }
-    
+
+   //Persistence Tests
+
     [Test]
-    public void SaveAndLoadAccomodation_WritesAndReadsCorrectly()
+    public void SaveAccomodation_WritesCorrectly()
     {
-        // --- Arrange ---
-        //clear extent before testing
-        var tempDir = Path.Combine(Path.GetTempPath(), "persistence");
-        AccomodationExtent.SetDirectory(tempDir);
-        AccomodationExtent.Accomodations.Clear();
+        // Arrange
+        var accomodation = new Accomodation("A160", AccomodationType.Room, 7);
+
+        // Act
+        Accomodation.Save();
+
+        // Assert
+        Assert.That(File.Exists(_xmlFile), Is.True, "XML file should exist after Save().");
+    }
+
+    [Test]
+    public void LoadAccomodation_ReadsCorrectly()
+    {
+        // Arrange 
+        var original = new Accomodation("A160", AccomodationType.Room, 7);
         
-        var accomodation = new Accomodation(
-            "A160",
-            AccomodationType.Room,
-            7);
-
-        AccomodationExtent.Accomodations.Add(accomodation);
-
-        // --- Act ---
-        AccomodationExtent.Save();             // Writes to XML
-        AccomodationExtent.Accomodations.Clear(); // Clear memory
-        AccomodationExtent.Load();             // Reads back from XML
+        Accomodation.Save();
         
-        AccomodationExtent.DisplayAll(); 
+        ClearAllExtents(); 
+        
+        Assert.That(Accomodation.Accomodations.Count, Is.EqualTo(0), "Memory should be empty before Load.");
 
-        // --- Assert ---
-        Assert.That(AccomodationExtent.Accomodations.Count, Is.EqualTo(1), "Extent should contain exactly 1 loaded item.");
+        // Act 
+        Accomodation.Load();
 
-        var loaded = AccomodationExtent.Accomodations.First();
+        // Assert 
+        Assert.That(Accomodation.Accomodations.Count, Is.EqualTo(1), "Should load 1 accomodation from file.");
 
+        var loaded = Accomodation.Accomodations.First();
+        
         Assert.Multiple(() =>
         {
             Assert.That(loaded.Number, Is.EqualTo("A160"));
             Assert.That(loaded.Type, Is.EqualTo(AccomodationType.Room));
             Assert.That(loaded.Capacity, Is.EqualTo(7));
         });
-        
     }
 }
