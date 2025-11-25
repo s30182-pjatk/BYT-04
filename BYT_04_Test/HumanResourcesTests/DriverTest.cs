@@ -3,6 +3,8 @@ using NUnit.Framework;
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace BYT_04_Test;
 
@@ -32,6 +34,30 @@ public class DriverTests
             licenseNumber,
             expiry ?? DateTime.Today.AddYears(1)
         );
+    }
+
+    /// <summary>
+    /// Completely resets static Driver.Drivers by overwriting the XML
+    /// with an empty list, then loading it to replace _drivers.
+    /// </summary>
+    private void ResetDriverExtent(string directory)
+    {
+        if (!Directory.Exists(directory))
+            Directory.CreateDirectory(directory);
+
+        Driver.SetDirectory(directory);
+
+        var xmlFile = Path.Combine(directory, "drivers.xml");
+
+        var emptyList = new List<Driver>();
+        var serializer = new XmlSerializer(typeof(List<Driver>));
+
+        using (var fs = new FileStream(xmlFile, FileMode.Create))
+        {
+            serializer.Serialize(fs, emptyList);
+        }
+
+        Driver.Load(); // loads empty → clears static extent
     }
 
 
@@ -71,26 +97,16 @@ public class DriverTests
     [Test]
     public void SaveDriver_WritesCorrectly()
     {
-        // Arrange
         var tempDir = Path.Combine(Path.GetTempPath(), "driver_persistence_tests");
+        ResetDriverExtent(tempDir); // CLEAN
+
+        var driver = MakeDriver();  // auto-adds to static list
+
+        Driver.Save();
+
         var xmlFile = Path.Combine(tempDir, "drivers.xml");
 
-        if (Directory.Exists(tempDir))
-            Directory.Delete(tempDir, true);
-
-        DriverExtent.SetDirectory(tempDir);
-        DriverExtent.Drivers.Clear();
-
-        var driver = MakeDriver();
-
-        DriverExtent.Drivers.Add(driver);
-
-        // Act
-        DriverExtent.Save();
-
-        // Assert
-        Assert.That(File.Exists(xmlFile), Is.True,
-            "XML file should exist after Save().");
+        Assert.That(File.Exists(xmlFile), Is.True);
     }
 
 
@@ -101,36 +117,32 @@ public class DriverTests
     [Test]
     public void LoadDriver_ReadsCorrectly()
     {
-        // Arrange
         var tempDir = Path.Combine(Path.GetTempPath(), "driver_persistence_tests");
-        var xmlFile = Path.Combine(tempDir, "drivers.xml");
 
-        DriverExtent.SetDirectory(tempDir);
+        ResetDriverExtent(tempDir); // clean start
 
-        // Ensure file exists if test runs alone
-        if (!File.Exists(xmlFile))
-            SaveDriver_WritesCorrectly();
+        var driver = MakeDriver();  // 1 driver
+        Driver.Save();
 
-        DriverExtent.Drivers.Clear();
+        Driver.Load();
 
-        // Act
-        DriverExtent.Load();
+        Assert.That(Driver.Drivers.Count, Is.EqualTo(1));
 
-        // Assert
-        Assert.That(DriverExtent.Drivers.Count, Is.EqualTo(1));
-
-        var loaded = DriverExtent.Drivers.First();
+        var loaded = Driver.Drivers.First();
 
         Assert.Multiple(() =>
         {
             Assert.That(loaded.Name, Is.EqualTo("John"));
             Assert.That(loaded.MiddleName, Is.EqualTo("M"));
             Assert.That(loaded.Surname, Is.EqualTo("Doe"));
+
             Assert.That(loaded.Email, Is.EqualTo("john@example.com"));
             Assert.That(loaded.Address.City, Is.EqualTo("City"));
 
             Assert.That(loaded.LicenseNumber, Is.EqualTo("ABC123"));
             Assert.That(loaded.LicenseExpiry >= DateTime.Today, Is.True);
         });
+        
+        ResetDriverExtent(tempDir); // clear
     }
 }

@@ -1,116 +1,130 @@
 using BYT_04;
 using NUnit.Framework;
+using System;
 using System.IO;
 using System.Linq;
 
-namespace BYT_04_Test;
-
-public class EmployeeTests
+namespace BYT_04_Test
 {
-    // ============================================================
-    // Validation Tests
-    // ============================================================
-    
-    [Test]
-    public void TestEmployeeInvalidEmploymentDate()
+    public class EmployeeTests
     {
-        var futureDate = DateTime.Today.AddDays(1);
+        private Address MakeAddress() =>
+            new Address("Street", "City", "State", "00000", "Country");
 
-        Assert.Throws<ArgumentException>(() =>
-            new Employee(futureDate, 5000));
-    }
+        private Employee MakeEmployee(DateTime employmentDate, decimal salary) =>
+            new Employee(
+                "John",
+                null,
+                "Doe",
+                new DateTime(1990, 1, 1),
+                "Male",
+                "12345678",
+                "john@doe.com",
+                MakeAddress(),
+                employmentDate,
+                salary
+            );
 
-    [Test]
-    public void TestEmployeeInvalidSalary()
-    {
-        var date = new DateTime(2020, 1, 1);
+        // ============================================================
+        // Validation Tests
+        // ============================================================
 
-        Assert.Throws<ArgumentException>(() =>
-            new Employee(date, -100));
-    }
-
-    [Test]
-    public void TestAddSubordinate_SetsManagerCorrectly()
-    {
-        var boss = new Employee(new DateTime(2010, 1, 1), 9000);
-        var worker = new Employee(new DateTime(2020, 1, 1), 3000);
-
-        boss.AddSubordinate(worker);
-
-        Assert.Multiple(() =>
+        [Test]
+        public void TestEmployeeInvalidEmploymentDate()
         {
-            Assert.That(boss.Subordinates.Contains(worker), Is.True);
-            Assert.That(worker.Manager, Is.EqualTo(boss));
-        });
-    }
+            var futureDate = DateTime.Today.AddDays(1);
 
-    // ============================================================
-    // 1) Save test – writes XML only
-    // ============================================================
+            Assert.Throws<ArgumentException>(() =>
+                MakeEmployee(futureDate, 5000));
+        }
 
-    [Test]
-    public void SaveEmployee_WritesCorrectly()
-    {
-        // Arrange
-        var tempDir = Path.Combine(Path.GetTempPath(), "employee_persistence_tests");
-        var xmlFile = Path.Combine(tempDir, "employees.xml");
+        [Test]
+        public void TestEmployeeInvalidSalary()
+        {
+            var date = new DateTime(2020, 1, 1);
 
-        if (Directory.Exists(tempDir))
-            Directory.Delete(tempDir, true);
+            Assert.Throws<ArgumentException>(() =>
+                MakeEmployee(date, -100));
+        }
 
-        EmployeeExtent.SetDirectory(tempDir);
-        EmployeeExtent.Employees.Clear();
+        [Test]
+        public void TestAddSubordinate_SetsManagerCorrectly()
+        {
+            var boss = MakeEmployee(new DateTime(2010, 1, 1), 9000);
+            var worker = MakeEmployee(new DateTime(2020, 1, 1), 3000);
 
-        var employee = new Employee(
-            new DateTime(2015, 3, 15),
-            4500m
-        );
+            boss.AddSubordinate(worker);
 
-        EmployeeExtent.Employees.Add(employee);
+            Assert.Multiple(() =>
+            {
+                Assert.That(boss.Subordinates.Contains(worker), Is.True);
+                Assert.That(worker.Manager, Is.EqualTo(boss));
+            });
+        }
 
-        // Act
-        EmployeeExtent.Save();
+        // ============================================================
+        // Save Test – writes XML
+        // ============================================================
 
-        // Assert
-        Assert.That(File.Exists(xmlFile), Is.True,
-            "XML file should exist after Save().");
-    }
+        [Test]
+        public void SaveEmployee_WritesCorrectly()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "employee_persistence_tests");
+            var xmlFile = Path.Combine(tempDir, "employees.xml");
 
-    // ============================================================
-    // 2) Load test – reads XML only
-    // ============================================================
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
 
-    [Test]
-    public void LoadEmployee_ReadsCorrectly()
-    {
-        // Arrange
-        var tempDir = Path.Combine(Path.GetTempPath(), "employee_persistence_tests");
-        var xmlFile = Path.Combine(tempDir, "employees.xml");
+            Employee.SetDirectory(tempDir);
+            Employee.Load();            // loads nothing
+            Employee.Employees.ToList().Clear(); // clear extent? impossible directly
 
-        EmployeeExtent.SetDirectory(tempDir);
+            // Clear private static list via Save() overwrite:
+            // We'll create 1 employee only
+            var employee = MakeEmployee(new DateTime(2015, 3, 15), 4500m);
 
-        // Ensure XML exists even if test runs independently
-        if (!File.Exists(xmlFile))
+            Employee.Save();
+
+            Assert.That(File.Exists(xmlFile), Is.True,
+                "XML file should exist after Save().");
+        }
+
+        // ============================================================
+        // Load Test – reads XML
+        // ============================================================
+
+        [Test]
+        public void LoadEmployee_ReadsCorrectly()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "employee_persistence_tests");
+            var xmlFile = Path.Combine(tempDir, "employees.xml");
+
+            Employee.SetDirectory(tempDir);
+
+            if (!File.Exists(xmlFile))
+                SaveEmployee_WritesCorrectly();
+
+            // Clear employees by overwriting XML with empty list
+            File.WriteAllText(xmlFile, ""); // empty -> Load() will skip
+
+            // Recreate file with one employee
             SaveEmployee_WritesCorrectly();
 
-        EmployeeExtent.Employees.Clear();
+            Employee.Load();
 
-        // Act
-        EmployeeExtent.Load();
+            Assert.That(Employee.Employees.Count, Is.EqualTo(1));
 
-        // Assert
-        Assert.That(EmployeeExtent.Employees.Count, Is.EqualTo(1));
+            var loaded = Employee.Employees.First();
 
-        var loaded = EmployeeExtent.Employees.First();
+            Assert.Multiple(() =>
+            {
+                Assert.That(loaded.EmploymentDate, Is.EqualTo(new DateTime(2015, 3, 15)));
+                Assert.That(loaded.Salary, Is.EqualTo(4500m));
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(loaded.EmploymentDate, Is.EqualTo(new DateTime(2015, 3, 15)));
-            Assert.That(loaded.Salary, Is.EqualTo(4500m));
-            
-            // Manager/Subordinates are ignored in XML => always null / empty
-            Assert.That(loaded.Manager, Is.Null);
-            Assert.That(loaded.Subordinates.Count, Is.EqualTo(0));
-        });
+                // Manager/Subordinates are ignored in XML
+                Assert.That(loaded.Manager, Is.Null);
+                Assert.That(loaded.Subordinates.Count, Is.EqualTo(0));
+            });
+        }
     }
 }

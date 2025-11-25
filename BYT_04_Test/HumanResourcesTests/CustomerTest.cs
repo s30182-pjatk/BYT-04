@@ -1,69 +1,28 @@
 using BYT_04;
 using NUnit.Framework;
+using System;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace BYT_04_Test;
 
 public class CustomerTests
 {
-    [Test]
-    public void TestCustomerCheckBalance()
+    // ------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------
+
+    private Address MakeAddress() =>
+        new Address("Street", "City", "State", "12345", "Country");
+
+    private Customer MakeCustomer(
+        bool isVip = true,
+        int points = 20
+    )
     {
-        DateTime birth = new DateTime(2015, 8, 28);
-
-        var address = new Address("some", "another", "dom", "somecode", "someplace");
-        var customer = new Customer(
-            "Gleb", null, "Denisov",
-            birth,
-            "male",
-            "+48999999999",
-            "email@gmail.com",
-            address,
-            isVip: true,
-            loyaltyPoints: 20
-        );
-
-        Assert.That(customer.LoyaltyPoints, Is.EqualTo(20));
-    }
-
-    [Test]
-    public void TestCustomerIsVip()
-    {
-        DateTime birth = new DateTime(2015, 8, 28);
-
-        var address = new Address("some", "another", "dom", "somecode", "someplace");
-        var customer = new Customer(
-            "Gleb", null, "Denisov",
-            birth,
-            "male",
-            "+48999999999",
-            "email@gmail.com",
-            address,
-            isVip: true,
-            loyaltyPoints: 20
-        );
-
-        Assert.That(customer.IsVip, Is.EqualTo(true));
-    }
-
-    //====================================================================
-    // 1) Save test – writes XML only
-    //====================================================================
-    [Test]
-    public void SaveCustomer_WritesCorrectly()
-    {
-        // Arrange
-        var tempDir = Path.Combine(Path.GetTempPath(), "customer_persistence_tests");
-        var xmlFile = Path.Combine(tempDir, "customers.xml");
-
-        if (Directory.Exists(tempDir))
-            Directory.Delete(tempDir, true);
-
-        CustomerExtent.SetDirectory(tempDir);
-        CustomerExtent.Customers.Clear();
-
-        var customer = new Customer(
+        return new Customer(
             "John",
             "B",
             "Walker",
@@ -71,24 +30,85 @@ public class CustomerTests
             "Male",
             "+48111222333",
             "john.walker@example.com",
-            new Address("Market St", "City", "State", "22-222", "Country"),
-            isVip: true,
-            loyaltyPoints: 150
+            MakeAddress(),
+            isVip,
+            points
         );
-
-        CustomerExtent.Customers.Add(customer);
-
-        // Act
-        CustomerExtent.Save();
-
-        // Assert
-        Assert.That(File.Exists(xmlFile), Is.True,
-            "XML file should exist after Save().");
     }
 
-    //====================================================================
-    // 2) Load test – reads XML only
-    //====================================================================
+    /// <summary>
+    /// Clears the Customer extent by overwriting XML with an empty list,
+    /// then loading it to reset the static list.
+    /// </summary>
+    private void ResetCustomerExtent(string dir)
+    {
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        Customer.SetDirectory(dir);
+
+        var xmlFile = Path.Combine(dir, "customers.xml");
+
+        var emptyList = new List<Customer>();
+        var serializer = new XmlSerializer(typeof(List<Customer>));
+
+        using (var fs = new FileStream(xmlFile, FileMode.Create))
+        {
+            serializer.Serialize(fs, emptyList);
+        }
+
+        Customer.Load();
+    }
+
+
+    // ============================================================
+    // Basic property tests
+    // ============================================================
+
+    [Test]
+    public void TestCustomerCheckBalance()
+    {
+        var customer = MakeCustomer(points: 20);
+
+        Assert.That(customer.LoyaltyPoints, Is.EqualTo(20));
+    }
+
+    [Test]
+    public void TestCustomerIsVip()
+    {
+        var customer = MakeCustomer(isVip: true);
+
+        Assert.That(customer.IsVip, Is.True);
+    }
+
+
+    // ============================================================
+    // Save Test
+    // ============================================================
+
+    [Test]
+    public void SaveCustomer_WritesCorrectly()
+    {
+        // Arrange
+        var tempDir = Path.Combine(Path.GetTempPath(), "customer_persistence_tests");
+        var xmlFile = Path.Combine(tempDir, "customers.xml");
+
+        ResetCustomerExtent(tempDir); // clean state
+
+        var customer = MakeCustomer(points: 150);
+
+        // Act
+        Customer.Save();
+
+        // Assert
+        Assert.That(File.Exists(xmlFile), Is.True);
+    }
+
+
+    // ============================================================
+    // Load Test
+    // ============================================================
+
     [Test]
     public void LoadCustomer_ReadsCorrectly()
     {
@@ -96,21 +116,21 @@ public class CustomerTests
         var tempDir = Path.Combine(Path.GetTempPath(), "customer_persistence_tests");
         var xmlFile = Path.Combine(tempDir, "customers.xml");
 
-        CustomerExtent.SetDirectory(tempDir);
+        ResetCustomerExtent(tempDir);
 
-        // Ensure XML exists if test runs alone
-        if (!File.Exists(xmlFile))
-            SaveCustomer_WritesCorrectly();
+        // Create and save one customer
+        var customer = MakeCustomer(points: 150);
+        Customer.Save();
 
-        CustomerExtent.Customers.Clear();
+        
 
         // Act
-        CustomerExtent.Load();
+        Customer.Load();
 
         // Assert
-        Assert.That(CustomerExtent.Customers.Count, Is.EqualTo(1));
+        Assert.That(Customer.Customers.Count, Is.EqualTo(1));
 
-        var loaded = CustomerExtent.Customers.First();
+        var loaded = Customer.Customers.First();
 
         Assert.Multiple(() =>
         {
@@ -123,5 +143,7 @@ public class CustomerTests
             Assert.That(loaded.IsVip, Is.True);
             Assert.That(loaded.LoyaltyPoints, Is.EqualTo(150));
         });
+        
+        ResetCustomerExtent(tempDir);
     }
 }

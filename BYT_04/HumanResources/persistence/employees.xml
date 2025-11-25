@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfEmployee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Employee>
+    <EmploymentDate>2020-01-10T00:00:00</EmploymentDate>
+    <Salary>5000</Salary>
+  </Employee>
+  <Employee>
+    <EmploymentDate>2021-03-05T00:00:00</EmploymentDate>
+    <Salary>3000</Salary>
+  </Employee>
+  <Employee>
+    <EmploymentDate>2022-06-15T00:00:00</EmploymentDate>
+    <Salary>3200</Salary>
+  </Employee>
+</ArrayOfEmployee>
