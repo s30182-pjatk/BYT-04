@@ -5,7 +5,11 @@ namespace BYT_04.Reservations;
 
 [Serializable]
 public class ReservationAccomodation
-{   [XmlIgnore]
+{
+    private static readonly List<ReservationAccomodation> _reservationAccomodations = new();
+    //public static IReadOnlyList<ReservationAccomodation>  ReservationAccomodations => _reservationAccomodations.AsReadOnly();
+    
+    [XmlIgnore]
     private Reservation _reservation = null!;
     [XmlIgnore]
     private Accomodation _accomodation = null!;
@@ -119,6 +123,8 @@ public class ReservationAccomodation
         ConditionBefore = conditionBefore;
         ConditionAfter = conditionAfter;
         Notes = notes;
+        
+        AddReservationAccomodation(this);
     }
 
     public override string ToString()
@@ -135,11 +141,17 @@ public class ReservationAccomodation
                $"Notes: {Notes ?? "N/A"}\n" +
                "-----------------------------";
     }
-}
 
-public static class ReservationAccomodationExtent
-{
-    public static List<ReservationAccomodation> ReservationAccomodations { get; private set; } = new();
+    private static void AddReservationAccomodation(ReservationAccomodation reservationAccomodation)
+    {
+        if (reservationAccomodation == null)
+        {
+            throw new ArgumentException("ReservationAccomodation cannot be null");
+        }
+        _reservationAccomodations.Add(reservationAccomodation);
+    }
+    
+    //Persistence
     
     private static string _directoryPath =
         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
@@ -164,7 +176,7 @@ public static class ReservationAccomodationExtent
         XmlSerializer serializer = new(typeof(List<ReservationAccomodation>));
 
         using FileStream fs = new(FilePath, FileMode.Create);
-        serializer.Serialize(fs, ReservationAccomodations);
+        serializer.Serialize(fs, _reservationAccomodations);
     }
 
     public static void Load()
@@ -175,16 +187,21 @@ public static class ReservationAccomodationExtent
             return;
 
         XmlSerializer serializer = new(typeof(List<ReservationAccomodation>));
-
         using FileStream fs = new(FilePath, FileMode.Open);
 
-        if (serializer.Deserialize(fs) is List<ReservationAccomodation> loaded)
-            ReservationAccomodations = loaded;
+        var loaded = serializer.Deserialize(fs) as List<ReservationAccomodation>;
+
+        
+        if (loaded != null)
+        {
+            _reservationAccomodations.Clear();
+            _reservationAccomodations.AddRange(loaded);
+        }
     }
 
     public static void DisplayAll()
     {
-        if (ReservationAccomodations.Count == 0)
+        if (_reservationAccomodations.Count == 0)
         {
             Console.WriteLine("No reservation-accommodation links found.");
             return;
@@ -192,7 +209,7 @@ public static class ReservationAccomodationExtent
 
         Console.WriteLine("\n--- Loaded Reservation-Accommodation ---\n");
 
-        foreach (var ra in ReservationAccomodations)
+        foreach (var ra in _reservationAccomodations)
         {
             Console.WriteLine(ra);
         }

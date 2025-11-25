@@ -4,10 +4,10 @@ public class Program
 {
     static void Main()
     {
-        //PEOPLE
-        // Load existing people
-        PersonExtent.Load();
-
+        // //PEOPLE
+        // // Load existing people
+        Person.Load();
+        
         // OPTIONAL: Add a new person to test persistence
         var person = new Person(
             "John", "A", "Doe",
@@ -17,14 +17,12 @@ public class Program
             "john.doe@example.com",
             new Address("123 Street", "City", "State", "11111", "Country")
         );
-
-        PersonExtent.Persons.Add(person);
-
+        
         // Save to XML
-        PersonExtent.Save();
-
+        Person.Save();
+        
         // Display loaded persons
-        PersonExtent.DisplayAll();
+        Person.DisplayAll();
         
         //--------------------------------------------------------------------------------------------------------------
         
@@ -64,22 +62,20 @@ public class Program
         //-------------------------------------------------------------------------------------------------------------
 
         //ReservationAccomodation
-        // ReservationAccomodationExtent.Load();
-        //
-        // var reservationaccomodation = new ReservationAccomodation(
-        //     reservation,
-        //     accomodation,
-        //     5,
-        //     DateTime.Today, 
-        //     DateTime.Today.AddDays(7),
-        //     "Good",
-        //     notes: "Heater needs to be fixed"
-        // );
-        //
-        // ReservationAccomodationExtent.ReservationAccomodations.Add(reservationaccomodation);
-        //
-        // ReservationAccomodationExtent.Save();
-        // ReservationAccomodationExtent.DisplayAll();
+        ReservationAccomodation.Load();
+        
+        var reservationaccomodation = new ReservationAccomodation(
+            reservation,
+            accomodation,
+            5,
+            DateTime.Today, 
+            DateTime.Today.AddDays(7),
+            "Good",
+            notes: "Heater needs to be fixed"
+        );
+        
+        ReservationAccomodation.Save();
+        ReservationAccomodation.DisplayAll();
     }
     
     
