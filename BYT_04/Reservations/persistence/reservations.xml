@@ -7,4 +7,18 @@
     <Status>Pending</Status>
     <TotalPrice>105</TotalPrice>
   </Reservation>
+  <Reservation>
+    <ReservationId>1</ReservationId>
+    <StartDate>2025-11-24T00:00:00+01:00</StartDate>
+    <EndDate>2025-12-01T00:00:00+01:00</EndDate>
+    <Status>Pending</Status>
+    <TotalPrice>105</TotalPrice>
+  </Reservation>
+  <Reservation>
+    <ReservationId>1</ReservationId>
+    <StartDate>2025-11-24T00:00:00+01:00</StartDate>
+    <EndDate>2025-12-01T00:00:00+01:00</EndDate>
+    <Status>Pending</Status>
+    <TotalPrice>105</TotalPrice>
+  </Reservation>
 </ArrayOfReservation>
