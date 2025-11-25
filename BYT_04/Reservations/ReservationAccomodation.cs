@@ -7,7 +7,7 @@ namespace BYT_04.Reservations;
 public class ReservationAccomodation
 {
     private static readonly List<ReservationAccomodation> _reservationAccomodations = new();
-    //public static IReadOnlyList<ReservationAccomodation>  ReservationAccomodations => _reservationAccomodations.AsReadOnly();
+    public static IReadOnlyList<ReservationAccomodation>  ReservationAccomodations => _reservationAccomodations.AsReadOnly();
     
     [XmlIgnore]
     private Reservation _reservation = null!;
