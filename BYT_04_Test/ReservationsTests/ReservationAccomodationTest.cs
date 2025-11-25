@@ -1,12 +1,68 @@
-﻿using BYT_04.Reservations;
+﻿using System.Reflection;
+using BYT_04.Reservations;
 
 namespace BYT_04_Test.ReservationsTests;
 
+[TestFixture]
 public class ReservationAccomodationTest
 {
-    // --- dummy objects to satisfy the constructor ---
+    private string _tempDir;
+    private string _xmlFile;
+
+    [SetUp]
+    public void Setup()
+    {
+        _tempDir = Path.Combine(Path.GetTempPath(), "res_acc_persistence_tests");
+        _xmlFile = Path.Combine(_tempDir, "reservationaccomodation.xml");
+        
+        if (Directory.Exists(_tempDir))
+            Directory.Delete(_tempDir, true);
+
+        Directory.CreateDirectory(_tempDir);
+        
+        ReservationAccomodation.SetDirectory(_tempDir);
+
+        // Prevent data bleeding between tests
+        ClearAllExtents();
+    }
+
+    [TearDown]
+    public void Cleanup()
+    {
+        if (Directory.Exists(_tempDir))
+            Directory.Delete(_tempDir, true);
+        
+        ClearAllExtents();
+    }
+    
+    private void ClearAllExtents()
+    {
+        //Helper to clear static lists via reflection
+        ClearStaticList<ReservationAccomodation>("_reservationAccomodations");
+    }
+
+    private void ClearStaticList<T>(string fieldName)
+    {
+        var type = typeof(T);
+        var field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+        var prop = type.GetProperty(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+
+        object? listObject = null;
+
+        if (field != null) listObject = field.GetValue(null);
+        else if (prop != null) listObject = prop.GetValue(null);
+
+        if (listObject != null && listObject is System.Collections.IList list)
+        {
+            list.Clear();
+        }
+    }
+
+    //Dummy Data Helpers
+    
     private Reservation CreateDummyReservation()
     {
+        // If Reservation adds itself to a static list in constructor, it might persist unless cleared.
         return new Reservation(1, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
     }
 
@@ -14,13 +70,15 @@ public class ReservationAccomodationTest
     {
         return new Accomodation("101", AccomodationType.Room, 2);
     }
+    
+    //Validation Tests
 
     [Test]
-    public void TestReservationAccomodationInvalidGuests()
+    public void TestReservationAccomodationZeroGuests()
     {
         var res = CreateDummyReservation();
         var acc = CreateDummyAccomodation();
-        
+    
         // Test 0 guests
         Assert.Throws<ArgumentException>(() => new ReservationAccomodation 
         { 
@@ -28,6 +86,13 @@ public class ReservationAccomodationTest
             Accomodation = acc, 
             NumberOfGuests = 0 
         });
+    }
+
+    [Test]
+    public void TestReservationAccomodationNegativeGuests()
+    {
+        var res = CreateDummyReservation();
+        var acc = CreateDummyAccomodation();
 
         // Test negative guests
         Assert.Throws<ArgumentException>(() => new ReservationAccomodation 
@@ -43,11 +108,13 @@ public class ReservationAccomodationTest
     {
         var res = CreateDummyReservation();
         var acc = CreateDummyAccomodation();
-        var reservationaccomodation = new ReservationAccomodation { Reservation = res, Accomodation = acc };
         
-        var futureDate = DateTime.Today.AddDays(1);
+        var ra = new ReservationAccomodation(res, acc, 2, DateTime.Today, DateTime.Today.AddDays(1), "Ok");
+        
+        var futureDate = DateTime.Today.AddDays(10);
 
-        Assert.Throws<ArgumentException>(() => reservationaccomodation.CheckInDate = futureDate);
+        // CheckIn cannot be > Today 
+        Assert.Throws<ArgumentException>(() => ra.CheckInDate = futureDate);
     }
 
     [Test]
@@ -58,32 +125,29 @@ public class ReservationAccomodationTest
         
         var checkIn = DateTime.Today;
         var invalidCheckOut = DateTime.Today.AddDays(-1); // Before CheckIn
+        
+        var ra = new ReservationAccomodation(res, acc, 2, checkIn, DateTime.Today.AddDays(1), "Ok");
 
-        // Initialize with valid CheckIn first
-        var reservationaccomodation = new ReservationAccomodation 
-        { 
-            Reservation = res, 
-            Accomodation = acc,
-            CheckInDate = checkIn
-        };
-
-        Assert.Throws<ArgumentException>(() => reservationaccomodation.CheckOutDate = invalidCheckOut);
+        Assert.Throws<ArgumentException>(() => ra.CheckOutDate = invalidCheckOut);
     }
 
     [Test]
-    public void TestReservationAccomodationNullReferences()
+    public void TestReservationAccomodationNullReservation()
     {
         var acc = CreateDummyAccomodation();
-        var res = CreateDummyReservation();
-
-        // Test Null Reservation
+        
         Assert.Throws<ArgumentException>(() => new ReservationAccomodation 
         { 
             Reservation = null!, 
             Accomodation = acc 
         });
+    }
 
-        // Test Null Accomodation
+    [Test]
+    public void TestReservationAccomodationNullAccomodation()
+    {
+        var res = CreateDummyReservation();
+        
         Assert.Throws<ArgumentException>(() => new ReservationAccomodation 
         { 
             Reservation = res, 
@@ -91,21 +155,43 @@ public class ReservationAccomodationTest
         });
     }
 
-    [Test]
-    public void SaveAndLoadReservationAccomodation_WritesAndReadsCorrectly()
-    {
-        // --- Arrange ---
-        var tempDir = Path.Combine(Path.GetTempPath(), "persistence");
-        ReservationAccomodationExtent.SetDirectory(tempDir);
-        ReservationAccomodationExtent.ReservationAccomodations.Clear();
+    // Persistence Tests
 
+    [Test]
+    public void SaveReservationAccomodation_WritesCorrectly()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var acc = CreateDummyAccomodation();
+        
+        var ra = new ReservationAccomodation(
+            res,
+            acc,
+            numberOfGuests: 2,
+            checkInDate: DateTime.Today,
+            checkOutDate: DateTime.Today.AddDays(4),
+            conditionBefore: "Good",
+            notes: "Heater check"
+        );
+
+        // Act
+        ReservationAccomodation.Save();
+
+        // Assert
+        Assert.That(File.Exists(_xmlFile), Is.True, "XML file should exist after Save().");
+    }
+
+    [Test]
+    public void LoadReservationAccomodation_ReadsCorrectly()
+    {
+        // Arrange
         var res = CreateDummyReservation();
         var acc = CreateDummyAccomodation();
         
         var checkIn = DateTime.Today;
         var checkOut = DateTime.Today.AddDays(4);
 
-        var reservationaccomodation = new ReservationAccomodation(
+        var original = new ReservationAccomodation(
             res,
             acc,
             numberOfGuests: 2,
@@ -115,30 +201,28 @@ public class ReservationAccomodationTest
             notes: "Heater needs to be fixed"
         );
 
-        ReservationAccomodationExtent.ReservationAccomodations.Add(reservationaccomodation);
-
-        // --- Act ---
-        ReservationAccomodationExtent.Save();               // Writes to XML
-        ReservationAccomodationExtent.ReservationAccomodations.Clear(); // Clear memory
-        ReservationAccomodationExtent.Load();               // Reads back from XML
+        ReservationAccomodation.Save();               
         
-        ReservationAccomodationExtent.DisplayAll();
+        ClearAllExtents(); 
+        Assert.That(ReservationAccomodation.ReservationAccomodations.Count, Is.EqualTo(0), "Memory should be empty before load.");
 
-        // --- Assert ---
-        Assert.That(ReservationAccomodationExtent.ReservationAccomodations.Count, Is.EqualTo(1), "Extent should contain exactly 1 loaded item.");
+        // Act
+        ReservationAccomodation.Load();               
 
-        var loaded = ReservationAccomodationExtent.ReservationAccomodations.First();
+        // Assert
+        Assert.That(ReservationAccomodation.ReservationAccomodations.Count, Is.EqualTo(1), "Should have loaded exactly 1 item.");
+
+        var loaded = ReservationAccomodation.ReservationAccomodations.First();
 
         Assert.Multiple(() =>
         {
             Assert.That(loaded.NumberOfGuests, Is.EqualTo(2));
             Assert.That(loaded.ConditionBefore, Is.EqualTo("Good"));
             Assert.That(loaded.Notes, Is.EqualTo("Heater needs to be fixed"));
-            Assert.That(loaded.CheckInDate, Is.EqualTo(checkIn));
+            Assert.That(loaded.CheckInDate, Is.EqualTo(checkIn)); 
             Assert.That(loaded.CheckOutDate, Is.EqualTo(checkOut));
+            Assert.That(loaded.Reservation.ReservationId, Is.EqualTo(res.ReservationId));
+            Assert.That(loaded.Accomodation.Number, Is.EqualTo(acc.Number));
         });
-
-        // --- Cleanup ---
-        if(Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
     }
 }
