@@ -24,7 +24,6 @@ public class Fuel : VehiclePowerType
     public override string ToString()
     {
         return "Fuel Power Type\n"
-             + $"Tank capacity: {TankCapacity} L\n"
-             + "-----------------------------";
+             + $"Tank capacity: {TankCapacity} L\n";
     }
 }
