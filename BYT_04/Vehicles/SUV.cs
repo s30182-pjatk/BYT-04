@@ -8,17 +8,17 @@ namespace BYT_04.Vehicles;
 [Serializable]
 public class SUV : Vehicle
 {
-    private bool _hasWinterTires;
-    private bool _isFourWheelDrive;
+    private static bool _hasWinterTires;
+    private static bool _isFourWheelDrive;
     private float _maxSpeedInKpH;
 
-    public bool HasWinterTires
+    public static bool HasWinterTires
     {
         get => _hasWinterTires;
         set => _hasWinterTires = value;
     }
 
-    public bool IsFourWheelDrive
+    public static bool IsFourWheelDrive
     {
         get => _isFourWheelDrive;
         set => _isFourWheelDrive = value;
