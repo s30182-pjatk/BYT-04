@@ -20,8 +20,8 @@ public class Helicoper : Vehicle
 
     public Helicoper() { }
 
-    public Helicoper(string plateNumber, string model, int capacity, bool containMedKit)
-        : base(plateNumber, model, capacity, containMedKit)
+    public Helicoper(string plateNumber, string model, int capacity, bool containMedKit, VehiclePowerType powerType)
+        : base(plateNumber, model, capacity, containMedKit, powerType)
     {
         AddHelicopter(this);
     }

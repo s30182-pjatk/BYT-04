@@ -7,6 +7,9 @@ using BYT_04.Utility;
 namespace BYT_04.Vehicles;
 
 [Serializable]
+[XmlInclude(typeof(SUV))]
+[XmlInclude(typeof(ATV))]
+[XmlInclude(typeof(Helicoper))]
 public abstract class Vehicle
 {
     private string _plateNumber;
@@ -18,17 +21,12 @@ public abstract class Vehicle
     public string PlateNumber
     {
         get => _plateNumber;
-        set => value.ValidateRequiredString(nameof(_plateNumber));
+        set =>_plateNumber = value.ValidateRequiredString(nameof(_plateNumber));
     }
     public string Model
     {
         get => _model;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Model is required.", nameof(_model));
-            _model = value;
-        }
+        set => _model = value.ValidateRequiredString(nameof(Model));
     }
 
     public int Capacity

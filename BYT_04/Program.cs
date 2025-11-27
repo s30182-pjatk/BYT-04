@@ -1,9 +1,14 @@
-namespace BYT_04.Reservations;
+namespace BYT_04;
+using Reservations;
+using Vehicles;
 
 public class Program
 {
     static void Main()
     {
+
+
+
         // //PEOPLE
         // // Load existing people
         Person.Load();
@@ -76,6 +81,15 @@ public class Program
         
         ReservationAccomodation.Save();
         ReservationAccomodation.DisplayAll();
+
+    
+        //VEHICLES
+        Vehicles.Vehicle.Load();
+        var vehicle = new SUV("1234567890", "Toyota", 5, true, new Fuel(100f));
+        var vehicle2 = new ATV("GB QW491", "Mercedes", 4, true, new Electric(34.5f));
+        Vehicles.Vehicle.Save();
+        Vehicles.Vehicle.DisplayAll();
+
     }
     
     

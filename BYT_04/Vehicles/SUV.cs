@@ -42,8 +42,8 @@ public class SUV : Vehicle
 
     public SUV() { }
 
-    public SUV(string plateNumber, string model, int capacity, bool containMedKit)
-        : base(plateNumber, model, capacity, containMedKit)
+    public SUV(string plateNumber, string model, int capacity, bool containMedKit, VehiclePowerType powerType)
+        : base(plateNumber, model, capacity, containMedKit, powerType)
     {
         AddSUV(this);
     }

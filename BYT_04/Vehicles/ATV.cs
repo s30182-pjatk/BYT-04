@@ -49,8 +49,8 @@ public class ATV : Vehicle
 
     public ATV() { }
 
-    public ATV(string plateNumber, string model, int capacity, bool containMedKit)
-        : base(plateNumber, model, capacity, containMedKit)
+    public ATV(string plateNumber, string model, int capacity, bool containMedKit, VehiclePowerType powerType)
+        : base(plateNumber, model, capacity, containMedKit, powerType)
     {
         AddATV(this);
     }
