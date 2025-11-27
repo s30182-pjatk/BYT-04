@@ -24,7 +24,6 @@ public class Electric : VehiclePowerType
     public override string ToString()
     {
         return "Electric Power Type\n"
-             + $"Battery capacity: {BatteryCapacity} kWh\n"
-             + "-----------------------------";
+             + $"Battery capacity: {BatteryCapacity} kWh\n";
     }
 }

@@ -58,6 +58,31 @@ public class ReservationVehicle
         set => _conditionAfter = string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
+    private float _fuelLevelBefore;
+    private float _fuelLevelAfter;
+
+    public float FuelLevelBefore
+    {
+        get => _fuelLevelBefore;
+        set
+        {
+            if (value < 0)
+                throw new ArgumentException("Fuel level before usage cannot be negative.");
+            _fuelLevelBefore = value;
+        }
+    }
+
+    public float FuelLevelAfter
+    {
+        get => _fuelLevelAfter;
+        set
+        {
+            if (value < 0)
+                throw new ArgumentException("Fuel level after usage cannot be negative.");
+            _fuelLevelAfter = value;
+        }
+    }
+
     private string? _notes;
 
     public string? Notes
@@ -75,6 +100,8 @@ public class ReservationVehicle
         Vehicle vehicle,
         string usgagePurpose,
         string conditionBefore,
+        float fuelLevelBefore,
+        float fuelLevelAfter,
         string? conditionAfter = null,
         string? notes = null)
     {
@@ -82,6 +109,8 @@ public class ReservationVehicle
         Vehicle = vehicle;
         UsgagePurpose = usgagePurpose;
         ConditionBefore = conditionBefore;
+        FuelLevelBefore = fuelLevelBefore;
+        FuelLevelAfter = fuelLevelAfter;
         ConditionAfter = conditionAfter;
         Notes = notes;
 
@@ -94,6 +123,8 @@ public class ReservationVehicle
                $"Vehicle Plate: {Vehicle.PlateNumber}\n" +
                $"Vehicle Model: {Vehicle.Model}\n" +
                $"Usage Purpose: {UsgagePurpose}\n" +
+               $"Fuel Before: {FuelLevelBefore}\n" +
+               $"Fuel After: {FuelLevelAfter}\n" +
                $"Condition Before: {ConditionBefore}\n" +
                $"Condition After: {ConditionAfter ?? "N/A"}\n" +
                $"Notes: {Notes ?? "N/A"}\n" +
