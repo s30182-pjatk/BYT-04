@@ -21,4 +21,25 @@
     <MaxSpeedInKpH>0</MaxSpeedInKpH>
     <HasGargoWrack>false</HasGargoWrack>
   </Vehicle>
+  <Vehicle xsi:type="SUV">
+    <PlateNumber>1234567890</PlateNumber>
+    <Model>Toyota</Model>
+    <Capacity>5</Capacity>
+    <ContainMedKit>true</ContainMedKit>
+    <PowerType xsi:type="Fuel">
+      <TankCapacity>100</TankCapacity>
+    </PowerType>
+    <MaxSpeedInKpH>0</MaxSpeedInKpH>
+  </Vehicle>
+  <Vehicle xsi:type="ATV">
+    <PlateNumber>GB QW491</PlateNumber>
+    <Model>Mercedes</Model>
+    <Capacity>4</Capacity>
+    <ContainMedKit>true</ContainMedKit>
+    <PowerType xsi:type="Electric">
+      <BatteryCapacity>34.5</BatteryCapacity>
+    </PowerType>
+    <MaxSpeedInKpH>0</MaxSpeedInKpH>
+    <HasGargoWrack>false</HasGargoWrack>
+  </Vehicle>
 </ArrayOfVehicle>
