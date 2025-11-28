@@ -87,4 +87,11 @@ public class Helicoper : Vehicle
             Console.WriteLine(h);
         }
     }
+
+    public override string ToString()
+    {
+        return base.ToString()
+               + "Aircraft type: Helicopter\n"
+               + "-------------------------";
+    }
 }

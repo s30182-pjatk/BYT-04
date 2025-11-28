@@ -116,4 +116,14 @@ public class ATV : Vehicle
             Console.WriteLine(a);
         }
     }
+
+    public override string ToString()
+    {
+        return base.ToString()
+               + $"Four wheel drive: {IsFourWheelDrive}\n"
+               + $"Winter tires: {HasWinterTires}\n"
+               + $"Max speed (km/h): {MaxSpeedInKpH}\n"
+               + $"Cargo wrack: {HasGargoWrack}\n"
+               + "-------------------------";
+    }
 }

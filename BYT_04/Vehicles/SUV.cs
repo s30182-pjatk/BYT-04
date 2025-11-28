@@ -31,6 +31,12 @@ public class SUV : Vehicle
         set => _maxSpeedInKpH = value;
     }
 
+    public bool HasWinch
+    {
+        get => _hasWinch;
+        set => _hasWinch = value;
+    }
+
     // --------- Extent properties ----------
     private static readonly List<SUV> _suvs = new();
     public static IReadOnlyList<SUV> SUVs => _suvs.AsReadOnly();
@@ -43,9 +49,10 @@ public class SUV : Vehicle
 
     public SUV() { }
 
-    public SUV(string plateNumber, string model, int capacity, bool containMedKit, VehiclePowerType powerType)
+    public SUV(string plateNumber, string model, int capacity, bool containMedKit, VehiclePowerType powerType, bool hasWinch)
         : base(plateNumber, model, capacity, containMedKit, powerType)
     {
+        HasWinch = hasWinch;
         AddSUV(this);
     }
 
@@ -109,5 +116,15 @@ public class SUV : Vehicle
         {
             Console.WriteLine(s);
         }
+    }
+
+    public override string ToString()
+    {
+        return base.ToString()
+               + $"Four wheel drive: {IsFourWheelDrive}\n"
+               + $"Winter tires: {HasWinterTires}\n"
+               + $"Max speed (km/h): {MaxSpeedInKpH}\n"
+               + $"Has winch: {HasWinch}\n"
+               + "=============================\n";
     }
 }

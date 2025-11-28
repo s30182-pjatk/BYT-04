@@ -9,6 +9,7 @@
       <TankCapacity>100</TankCapacity>
     </PowerType>
     <MaxSpeedInKpH>0</MaxSpeedInKpH>
+    <HasWinch>true</HasWinch>
   </Vehicle>
   <Vehicle xsi:type="ATV">
     <PlateNumber>GB QW491</PlateNumber>
