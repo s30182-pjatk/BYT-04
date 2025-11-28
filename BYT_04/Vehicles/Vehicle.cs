@@ -156,8 +156,7 @@ public abstract class Vehicle
              + $"Model: {Model}\n"
              + $"Capacity: {Capacity}\n"
              + $"Contains MedKit: {ContainMedKit}\n"
-             + $"Power Type: {PowerType}\n"
-             + "-----------------------------";
+             + $"Power Type: {PowerType}\n";
     }
 }
 
