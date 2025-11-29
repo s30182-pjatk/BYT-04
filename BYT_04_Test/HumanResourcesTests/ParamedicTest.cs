@@ -1,9 +1,9 @@
 using BYT_04;
+using BYT_04_Test.TestUtils;
 using NUnit.Framework;
 using System;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace BYT_04_Test
 {
@@ -12,10 +12,9 @@ namespace BYT_04_Test
         [SetUp]
         public void Reset()
         {
-            // Clear static list before each test
-            typeof(Paramedic)
-                .GetField("_paramedics", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
-                ?.SetValue(null, new List<Paramedic>());
+            // Clear static lists before each test (both Paramedic and Person collections)
+            ClearList.ClearStaticList<Paramedic>("_paramedics");
+            ClearList.ClearStaticList<Person>("_persons");
         }
 
         // ============================================================
@@ -97,8 +96,7 @@ namespace BYT_04_Test
                 address,
                 "CPR-777"
             );
-
-            Paramedic.Add(p);
+          
 
             // Act
             Paramedic.Save();
@@ -118,16 +116,34 @@ namespace BYT_04_Test
             var tempDir = Path.Combine(Path.GetTempPath(), "paramedic_persistence_tests");
             var xmlFile = Path.Combine(tempDir, "paramedics.xml");
 
+            // Clean up any existing test files
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+
             Paramedic.SetDirectory(tempDir);
 
-            // Ensure file exists if this test runs alone
-            if (!File.Exists(xmlFile))
-                SaveParamedic_WritesCorrectly();
+            // Clear collections before creating test data
+            ClearList.ClearStaticList<Paramedic>("_paramedics");
+            ClearList.ClearStaticList<Person>("_persons");
 
-            // Clear list before loading
-            typeof(Paramedic)
-                .GetField("_paramedics", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
-                ?.SetValue(null, new List<Paramedic>());
+            // Create and save test data
+            var address = new Address("Street", "Town", "Region", "11111", "Country");
+            var p = new Paramedic(
+                "Bob",
+                null,
+                "Marley",
+                new DateTime(1992, 2, 2),
+                "Male",
+                "12345",
+                "bob@example.com",
+                address,
+                "CPR-777"
+            );
+            Paramedic.Save();
+
+            // Clear lists before loading (both Paramedic and Person collections)
+            ClearList.ClearStaticList<Paramedic>("_paramedics");
+            ClearList.ClearStaticList<Person>("_persons");
 
             // Act
             Paramedic.Load();

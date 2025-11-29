@@ -1,4 +1,5 @@
 using BYT_04;
+using BYT_04_Test.TestUtils;
 using NUnit.Framework;
 using System;
 using System.IO;
@@ -107,8 +108,16 @@ namespace BYT_04_Test
             // Clear employees by overwriting XML with empty list
             File.WriteAllText(xmlFile, ""); // empty -> Load() will skip
 
+            // Clear both Employee and Person collections
+            ClearList.ClearStaticList<Employee>("_employees");
+            ClearList.ClearStaticList<Person>("_persons");
+
             // Recreate file with one employee
             SaveEmployee_WritesCorrectly();
+
+            // Clear again before loading
+            ClearList.ClearStaticList<Employee>("_employees");
+            ClearList.ClearStaticList<Person>("_persons");
 
             Employee.Load();
 

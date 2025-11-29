@@ -1,4 +1,5 @@
 ﻿using BYT_04;
+using BYT_04_Test.TestUtils;
 using NUnit.Framework;
 using System.IO;
 using System.Linq;
@@ -11,9 +12,9 @@ namespace BYT_04_Test
         public void Reset()
         {
             // Clear static collection before each test
-            typeof(Person)
-                .GetField("_persons", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
-                ?.SetValue(null, new List<Person>());
+            // Also clear Customer collection since we're using Customer instances
+            ClearList.ClearStaticList<Person>("_persons");
+            ClearList.ClearStaticList<Customer>("_customers");
         }
 
         [Test]
@@ -23,8 +24,8 @@ namespace BYT_04_Test
             var address = new Address("some", "another", "dom", "somecode", "someplace");
 
             Assert.Throws<ArgumentException>(() =>
-                new Person("Gleb", null, "Denisov", invalidDate, "male",
-                    "+48999999999", "email@gmail.com", address));
+                new Customer("Gleb", null, "Denisov", invalidDate, "male",
+                    "+48999999999", "email@gmail.com", address, false, 0));
         }
 
         [Test]
@@ -33,8 +34,8 @@ namespace BYT_04_Test
             DateTime date1 = new DateTime(2015, 8, 28);
 
             var address = new Address("some", "another", "dom", "somecode", "someplace");
-            var person = new Person("Gleb", null, "Denisov", date1,
-                "male", "+48999999999", "email@gmail.com", address);
+            var person = new Customer("Gleb", null, "Denisov", date1,
+                "male", "+48999999999", "email@gmail.com", address, false, 0);
 
             Assert.That(person.GetAge(), Is.EqualTo(10));
         }
@@ -55,13 +56,15 @@ namespace BYT_04_Test
 
             Person.SetDirectory(tempDir);
 
-            var person = new Person(
+            var person = new Customer(
                 "John", "A", "Doe",
                 new DateTime(1990, 5, 12),
                 "Male",
                 "123456789",
                 "john.doe@example.com",
-                new Address("123 Street", "City", "State", "11111", "Country")
+                new Address("123 Street", "City", "State", "11111", "Country"),
+                false,
+                0
             );
 
             Person.Add(person);
@@ -85,16 +88,32 @@ namespace BYT_04_Test
             var tempDir = Path.Combine(Path.GetTempPath(), "person_persistence_tests");
             var xmlFile = Path.Combine(tempDir, "persons.xml");
 
+            // Clean up any existing test files
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+
             Person.SetDirectory(tempDir);
 
-            // If file does not exist (running test alone), generate it
-            if (!File.Exists(xmlFile))
-                SavePerson_WritesCorrectly();
+            // Clear collections before creating test data
+            ClearList.ClearStaticList<Person>("_persons");
+            ClearList.ClearStaticList<Customer>("_customers");
 
-            // Clear current in-memory collection
-            typeof(Person)
-                .GetField("_persons", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
-                ?.SetValue(null, new List<Person>());
+            // Create and save test data
+            var person = new Customer(
+                "John", "A", "Doe",
+                new DateTime(1990, 5, 12),
+                "Male",
+                "123456789",
+                "john.doe@example.com",
+                new Address("123 Street", "City", "State", "11111", "Country"),
+                false,
+                0
+            );
+
+            Person.Save();
+
+            ClearList.ClearStaticList<Person>("_persons");
+            ClearList.ClearStaticList<Customer>("_customers");
 
             // Act
             Person.Load();
