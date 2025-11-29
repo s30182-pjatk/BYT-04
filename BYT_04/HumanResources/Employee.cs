@@ -4,9 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
+using BYT_04.Utility;
 
 [Serializable]
-public class Employee
+public class Employee : Person
 {
     // ============================================================
     //                STATIC EXTENT & PERSISTENCE
@@ -95,74 +96,8 @@ public class Employee
     //                INSTANCE DATA
     // ============================================================
 
-    private string _name = null!;
-    private string? _middleName;
-    private string _surname = null!;
-    private DateTime _birthDate;
-    private string _gender = null!;
-    private string _phoneNumber = null!;
-    private string _email = null!;
-    private Address _address = null!;
-
     private DateTime _employmentDate;
     private decimal _salary;
-
-
-    // --------------------  PERSON FIELDS  ----------------------
-
-    public string Name
-    {
-        get => _name;
-        set => _name = ValidateRequiredString(value, nameof(Name));
-    }
-
-    public string? MiddleName
-    {
-        get => _middleName;
-        set => _middleName = string.IsNullOrWhiteSpace(value) ? null : value;
-    }
-
-    public string Surname
-    {
-        get => _surname;
-        set => _surname = ValidateRequiredString(value, nameof(Surname));
-    }
-
-    public DateTime BirthDate
-    {
-        get => _birthDate;
-        set
-        {
-            if (value > DateTime.Today)
-                throw new ArgumentException("Birth date cannot be in the future.");
-            _birthDate = value;
-        }
-    }
-
-    public string Gender
-    {
-        get => _gender;
-        set => _gender = ValidateRequiredString(value, nameof(Gender));
-    }
-
-    public string PhoneNumber
-    {
-        get => _phoneNumber;
-        set => _phoneNumber = ValidateRequiredString(value, nameof(PhoneNumber));
-    }
-
-    public string Email
-    {
-        get => _email;
-        set => _email = ValidateRequiredString(value, nameof(Email));
-    }
-
-    public Address Address
-    {
-        get => _address;
-        set => _address = value ?? throw new ArgumentException("Address cannot be null.");
-    }
-
 
     // -------------------- EMPLOYEE FIELDS ----------------------
 
@@ -216,17 +151,8 @@ public class Employee
         DateTime employmentDate,
         decimal salary,
         Employee? manager = null
-    )
+    ) : base(name, middleName, surname, birthDate, gender, phoneNumber, email, address)
     {
-        Name = name;
-        MiddleName = middleName;
-        Surname = surname;
-        BirthDate = birthDate;
-        Gender = gender;
-        PhoneNumber = phoneNumber;
-        Email = email;
-        Address = address;
-
         EmploymentDate = employmentDate;
         Salary = salary;
         Manager = manager;
@@ -249,23 +175,5 @@ public class Employee
 
         Subordinates.Add(e);
         e.Manager = this;
-    }
-
-
-    private static string ValidateRequiredString(string? value, string field)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"{field} cannot be empty.");
-        return value;
-    }
-
-
-    public int GetAge()
-    {
-        var today = DateTime.Today;
-        int age = today.Year - BirthDate.Year;
-        if (BirthDate.Date > today.AddYears(-age))
-            age--;
-        return age;
     }
 }

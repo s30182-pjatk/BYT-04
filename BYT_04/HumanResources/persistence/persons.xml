@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfPerson xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Person>
+  <Person xsi:type="Customer">
     <Name>John</Name>
     <MiddleName>A</MiddleName>
     <Surname>Doe</Surname>
@@ -15,5 +15,7 @@
       <PostalCode>11111</PostalCode>
       <Country>Country</Country>
     </Address>
+    <IsVip>false</IsVip>
+    <LoyaltyPoints>0</LoyaltyPoints>
   </Person>
 </ArrayOfPerson>
