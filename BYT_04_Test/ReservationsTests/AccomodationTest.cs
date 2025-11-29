@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using BYT_04.Reservations;
+﻿using BYT_04.Reservations;
+using BYT_04_Test.TestUtils;
 
 namespace BYT_04_Test.ReservationsTests;
 
@@ -39,24 +39,7 @@ public class AccomodationTest
     private void ClearAllExtents()
     {
         //Helper to clear static lists via reflection
-        ClearStaticList<Accomodation>("_accomodations");
-    }
-
-    private void ClearStaticList<T>(string fieldName)
-    {
-        var type = typeof(T);
-        var field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
-        var prop = type.GetProperty(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
-
-        object? listObject = null;
-
-        if (field != null) listObject = field.GetValue(null);
-        else if (prop != null) listObject = prop.GetValue(null);
-
-        if (listObject != null && listObject is System.Collections.IList list)
-        {
-            list.Clear();
-        }
+        ClearList.ClearStaticList<Accomodation>("_accomodations");
     }
     
     //Logic Tests

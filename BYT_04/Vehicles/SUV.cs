@@ -125,6 +125,6 @@ public class SUV : Vehicle
                + $"Winter tires: {HasWinterTires}\n"
                + $"Max speed (km/h): {MaxSpeedInKpH}\n"
                + $"Has winch: {HasWinch}\n"
-               + "=============================\n";
+               + "-------------------------\n";
     }
 }

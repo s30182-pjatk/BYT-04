@@ -7,7 +7,11 @@ using System.Xml.Serialization;
 using System.IO;
 
 [Serializable]
-public class Person
+[XmlInclude(typeof(Employee))]
+[XmlInclude(typeof(Customer))]
+[XmlInclude(typeof(Paramedic))]
+[XmlInclude(typeof(Driver))]
+public abstract class Person
 {
     // ------------------------------
     //  STATIC PERSISTENCE MEMBERS
