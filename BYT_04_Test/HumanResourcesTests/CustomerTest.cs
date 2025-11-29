@@ -81,6 +81,32 @@ public class CustomerTests
         Assert.That(customer.IsVip, Is.True);
     }
 
+    [Test]
+    public void TestCustomerMakeVip_ShouldSetIsVipToTrue()
+    {
+        // Arrange
+        var customer = MakeCustomer(isVip: false);
+
+        // Act
+        customer.MakeVip();
+
+        // Assert
+        Assert.That(customer.IsVip, Is.True);
+    }
+
+    [Test]
+    public void TestCustomerMakeVip_WhenAlreadyVip_ShouldRemainVip()
+    {
+        // Arrange
+        var customer = MakeCustomer(isVip: true);
+
+        // Act
+        customer.MakeVip();
+
+        // Assert
+        Assert.That(customer.IsVip, Is.True);
+    }
+
 
     // ============================================================
     // Save Test

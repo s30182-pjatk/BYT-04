@@ -145,5 +145,8 @@ namespace BYT_04
         // ============================================================
 
         public int CheckLoyaltyPoints() => LoyaltyPoints;
+        public void MakeVip(){
+            IsVip = true;
+        }
     }
 }
