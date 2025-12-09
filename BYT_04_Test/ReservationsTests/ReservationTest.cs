@@ -192,4 +192,38 @@ public class ReservationTest
         });
     }
     
+    [Test]
+    public void TestReservationAddTripShouldCreateReverseConnection()
+    {
+        // Arrange
+        var res = new Reservation(1, DateTime.Today, DateTime.Today.AddDays(5), ReservationStatus.Pending, 1000m);
+        var trip = new Trip("Ski Trip", "Alps", DateTime.Today, DateTime.Today.AddDays(5), 500m);
+
+        // Act
+        res.AddTrip(trip);
+
+        // Assert
+        // Check if Reservation contains the Trip
+        Assert.That(res.ReservationsTrips.Contains(trip), Is.True, "Reservation should contain the Trip.");
+        
+        // Check if Trip contains Reservation 
+        Assert.That(trip.Reservations.Contains(res), Is.True, "Trip should automatically contain the Reservation.");
+    }
+
+    [Test]
+    public void TestReservationRemoveTripShouldRemoveReverseConnection()
+    {
+        // Arrange
+        var res = new Reservation(1, DateTime.Today, DateTime.Today.AddDays(5), ReservationStatus.Pending, 1000m);
+        var trip = new Trip("Ski Trip", "Alps", DateTime.Today, DateTime.Today.AddDays(5), 500m);
+        res.AddTrip(trip);
+
+        // Act
+        res.RemoveTrip(trip);
+
+        // Assert
+        Assert.That(res.ReservationsTrips.Contains(trip), Is.False);
+        Assert.That(trip.Reservations.Contains(res), Is.False, "Reverse connection in Trip should be removed.");
+    }
+    
 }

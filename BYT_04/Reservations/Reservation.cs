@@ -33,6 +33,11 @@ public class Reservation
     [XmlIgnore]
     public IEnumerable<ReservationVehicle> ReservationVehicles => _reservationVehicles.ToList();
     
+    [XmlIgnore]
+    private HashSet<Trip> _trips = new();
+    [XmlIgnore]
+    public IEnumerable<Trip> ReservationsTrips => _trips.ToList();
+    
     public int ReservationId
     {
         get => _reservationId;
@@ -167,6 +172,34 @@ public class Reservation
         if (rv != null && _reservationVehicles.Contains(rv))
         {
             _reservationVehicles.Remove(rv);
+        }
+    }
+    
+    public void AddTrip(Trip trip)
+    {
+        if (trip == null) return;
+        
+        if (!_trips.Contains(trip))
+        {
+            _trips.Add(trip);
+            
+            if (!trip.Reservations.Contains(this))
+            {
+                trip.AddReservation(this);
+            }
+        }
+    }
+
+    public void RemoveTrip(Trip trip)
+    {
+        if (trip != null && _trips.Contains(trip))
+        {
+            _trips.Remove(trip);
+            
+            if (trip.Reservations.Contains(this))
+            {
+                trip.RemoveReservation(this);
+            }
         }
     }
     

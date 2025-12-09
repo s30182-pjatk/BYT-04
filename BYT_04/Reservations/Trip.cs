@@ -30,9 +30,13 @@ public class Trip
     // Association
     [XmlIgnore]
     private HashSet<TripEquipment> _tripEquipments = new();
-
     [XmlIgnore]
     public IEnumerable<TripEquipment> TripEquipments => _tripEquipments.ToList();
+    
+    [XmlIgnore]
+    private HashSet<Reservation> _reservations = new();
+    [XmlIgnore]
+    public IEnumerable<Reservation> Reservations => _reservations.ToList();
 
    
     public string Name
@@ -147,6 +151,35 @@ public class Trip
         if (te != null && _tripEquipments.Contains(te))
         {
             _tripEquipments.Remove(te);
+        }
+    }
+    
+    public void AddReservation(Reservation res)
+    {
+        if (res == null) return;
+        
+        if (!_reservations.Contains(res))
+        {
+            _reservations.Add(res);
+
+            
+            if (!res.ReservationsTrips.Contains(this))
+            {
+                res.AddTrip(this);
+            }
+        }
+    }
+
+    public void RemoveReservation(Reservation res)
+    {
+        if (res != null && _reservations.Contains(res))
+        {
+            _reservations.Remove(res);
+            
+            if (res.ReservationsTrips.Contains(this))
+            {
+                res.RemoveTrip(this);
+            }
         }
     }
 

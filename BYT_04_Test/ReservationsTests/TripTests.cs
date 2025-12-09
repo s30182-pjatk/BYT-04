@@ -186,5 +186,38 @@ namespace BYT_04.Tests.ReservationsTests
             var expectedPath = Path.Combine(tempDir, "trips.xml");
             Assert.That(File.Exists(expectedPath), Is.True);
         }
+        
+        [Test]
+        public void TestAddReservationShouldCreateReverseConnection()
+        {
+            // Arrange
+            var trip = new Trip("Summer Camp", "Lake", DateTime.Today, DateTime.Today.AddDays(5), 300m);
+            var res = new Reservation(1, DateTime.Today, DateTime.Today.AddDays(5), ReservationStatus.Pending, 300m);
+
+            // Act
+            trip.AddReservation(res);
+
+            // Assert
+            Assert.That(trip.Reservations.Contains(res), Is.True);
+            Assert.That(res.ReservationsTrips.Contains(trip), Is.True, "Reverse connection in Reservation should be created.");
+        }
+
+        [Test]
+        public void TestOneTrip_MultipleReservations()
+        {
+            // Arrange
+            var trip = new Trip("Concert Bus", "Stadium", DateTime.Today, DateTime.Today, 50m);
+            var res1 = new Reservation(1, DateTime.Today, DateTime.Today, ReservationStatus.Pending, 50m);
+            var res2 = new Reservation(2, DateTime.Today, DateTime.Today, ReservationStatus.Pending, 50m);
+
+            // Act
+            trip.AddReservation(res1);
+            trip.AddReservation(res2);
+
+            // Assert
+            Assert.That(trip.Reservations.Count(), Is.EqualTo(2), "Trip should hold multiple reservations.");
+            Assert.That(res1.ReservationsTrips.Contains(trip), Is.True);
+            Assert.That(res2.ReservationsTrips.Contains(trip), Is.True);
+        }
     }
 }
