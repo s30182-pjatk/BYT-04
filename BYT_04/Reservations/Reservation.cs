@@ -22,6 +22,12 @@ public class Reservation
     private ReservationStatus _status;
     private decimal _totalPrice;
     
+    // Association
+    [XmlIgnore]
+    private HashSet<ReservationAccomodation> _reservationAccomodations = new();
+
+    [XmlIgnore]
+    public IEnumerable<ReservationAccomodation> ReservationAccomodations => _reservationAccomodations.ToList();
     
     public int ReservationId
     {
@@ -108,6 +114,31 @@ public class Reservation
         TotalPrice = totalPrice;
         
         AddReservation(this);
+    }
+    
+    // Association Methods
+    public void AddReservationAccomodation(ReservationAccomodation ra)
+    {
+        if (ra == null) return;
+
+        if (!_reservationAccomodations.Contains(ra))
+        {
+            _reservationAccomodations.Add(ra);
+            
+            // Trigger Reverse Connection
+            if (ra.Reservation != this)
+            {
+                ra.Reservation = this;
+            }
+        }
+    }
+
+    public void RemoveReservationAccomodation(ReservationAccomodation ra)
+    {
+        if (ra != null && _reservationAccomodations.Contains(ra))
+        {
+            _reservationAccomodations.Remove(ra);
+        }
     }
     
     // Methods

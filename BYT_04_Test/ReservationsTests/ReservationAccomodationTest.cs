@@ -208,4 +208,67 @@ public class ReservationAccomodationTest
             Assert.That(loaded.Accomodation.Number, Is.EqualTo(acc.Number));
         });
     }
+    
+    // Association Tests
+    
+    [Test]
+    public void TestReservationConstructorCreatesReverseConnectionsAutomatically()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var acc = CreateDummyAccomodation();
+
+        // Act
+        var ra = new ReservationAccomodation(res, acc, 2, DateTime.Today, DateTime.Today.AddDays(1), "Good");
+
+        // Assert 
+        // 1. Check Reservation knows about the link
+        Assert.That(res.ReservationAccomodations.Contains(ra), Is.True, 
+        "Reservation should contain the link in its collection.");
+        
+        // 2. Check Accomodation knows about the link
+        Assert.That(acc.ReservationAccomodations.Contains(ra), Is.True, 
+            "Accomodation should contain the link in its collection.");
+    }
+    
+    [Test]
+    public void TestReservationRemoveLinkRemovesReverseConnection()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var acc = CreateDummyAccomodation();
+        var ra = new ReservationAccomodation(res, acc, 2, DateTime.Today, DateTime.Today.AddDays(1), "Good");
+
+        // Pre-check
+        Assert.That(acc.ReservationAccomodations.Contains(ra), Is.True);
+
+        // Act
+        // remove ink from one side
+        acc.RemoveReservationAccomodation(ra);
+
+        // Assert 
+        Assert.That(acc.ReservationAccomodations.Contains(ra), Is.False, 
+        "Link should be removed from Accomodation collection.");
+        
+    }
+    
+    [Test]
+    public void BagConstraint_AllowsMultipleLinks_BetweenSameObjects()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var acc = CreateDummyAccomodation();
+
+        // Act
+        // Link 1
+        var ra1 = new ReservationAccomodation(res, acc, 2, DateTime.Today, DateTime.Today.AddDays(1), "Good");
+    
+        // Link 2 (Same Reservation, Same Room, distinct link object)
+        var ra2 = new ReservationAccomodation(res, acc, 2, DateTime.Today, DateTime.Today.AddDays(6), "Good");
+
+        // Assert
+        Assert.That(acc.ReservationAccomodations.Count(), Is.EqualTo(2));
+        Assert.That(acc.ReservationAccomodations.Contains(ra1), Is.True);
+        Assert.That(acc.ReservationAccomodations.Contains(ra2), Is.True);
+    }
 }

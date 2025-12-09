@@ -19,17 +19,28 @@ public class ReservationAccomodation
     private string _conditionBefore = null!;
     private string? _conditionAfter;
     private string? _notes;
-
+    
+    // Association
     public Reservation Reservation
     {
         get => _reservation;
-        set => _reservation = value ?? throw new ArgumentException("Reservation cannot be null.");
+        set
+        {
+            _reservation = value ?? throw new ArgumentException("Reservation cannot be null.");
+            // Trigger Reverse Connection
+            _reservation.AddReservationAccomodation(this);
+        }
     }
 
     public Accomodation Accomodation
     {
         get => _accomodation;
-        set => _accomodation = value ?? throw new ArgumentException("Accomodation cannot be null.");
+        set
+        {
+            _accomodation = value ?? throw new ArgumentException("Accomodation cannot be null.");
+            // Trigger Reverse Connection
+            _accomodation.AddReservationAccomodation(this);
+        }
     }
 
     public int NumberOfGuests
@@ -115,8 +126,10 @@ public class ReservationAccomodation
         string? conditionAfter = null,
         string? notes = null)
     {
+        // Setters will trigger the AddReservationAccomodation methods in the parent classes
         Reservation = reservation;
         Accomodation = accomodation;
+        
         NumberOfGuests = numberOfGuests;
         CheckInDate = checkInDate;
         CheckOutDate = checkOutDate;

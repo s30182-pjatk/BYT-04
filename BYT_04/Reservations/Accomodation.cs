@@ -16,7 +16,13 @@ public class Accomodation
     private string _number = null!;
     private AccomodationType _type;
     private int _capacity;
-
+    
+    // Association
+    [XmlIgnore]
+    private HashSet<ReservationAccomodation> _reservationAccomodations = new();
+    
+    [XmlIgnore]
+    public IEnumerable<ReservationAccomodation> ReservationAccomodations => _reservationAccomodations.ToList();
 
     public string Number
     {
@@ -50,6 +56,32 @@ public class Accomodation
         Capacity = capacity;
         
         AddAccomodation(this);
+    }
+    
+    // Association Methods
+    public void AddReservationAccomodation(ReservationAccomodation ra)
+    {
+        if (ra == null) return;
+
+        // Prevent infinite recursion and duplicates
+        if (!_reservationAccomodations.Contains(ra))
+        {
+            _reservationAccomodations.Add(ra);
+
+            // Trigger Reverse Connection
+            if (ra.Accomodation != this)
+            {
+                ra.Accomodation = this;
+            }
+        }
+    }
+
+    public void RemoveReservationAccomodation(ReservationAccomodation ra)
+    {
+        if (ra != null && _reservationAccomodations.Contains(ra))
+        {
+            _reservationAccomodations.Remove(ra);
+        }
     }
 
     private static void AddAccomodation(Accomodation accomodation)
