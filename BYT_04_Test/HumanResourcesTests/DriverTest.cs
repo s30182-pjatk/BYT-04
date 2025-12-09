@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+using BYT_04.Vehicles;
 
 namespace BYT_04_Test;
 
@@ -144,5 +145,89 @@ public class DriverTests
         });
         
         ResetDriverExtent(tempDir); // clear
+    }
+    
+    // ============================================================
+    // Association Tests
+    // ============================================================
+    
+    [Test]
+    public void TestDriverAssignVehicleToDriverCreatesReverseConnection()
+    {
+        // Arrange
+        var driver = MakeDriver();
+        var vehicle = new SUV("V1", "Jeep", 4, true, new Fuel(100f), true);
+
+        // Act
+        driver.AddAssignedVehicle(vehicle);
+
+        // Assert
+        // Assign from Driver side
+        // Check Driver has Vehicle
+        Assert.That(driver.AssignedVehicles.Contains(vehicle), Is.True, "Driver should have the vehicle.");
+        
+        // Check Vehicle has Driver (Reverse Connection)
+        Assert.That(vehicle.AssignedDriver, Is.EqualTo(driver), "Vehicle should know its assigned driver.");
+    }
+
+    [Test]
+    public void TestDriverAssignDriverToVehicleCreatesReverseConnection()
+    {
+        // Arrange
+        var driver = MakeDriver();
+        var vehicle = new SUV("V2", "Ford", 4, true, new Fuel(100f), true);
+
+        // Act
+        // Assign from Vehicle side
+        vehicle.AssignedDriver = driver;
+
+        // Assert
+        // Check if Vehicle has Driver
+        Assert.That(vehicle.AssignedDriver, Is.EqualTo(driver));
+        
+        // Check if Driver has Vehicle (Reverse Connection)
+        Assert.That(driver.AssignedVehicles.Contains(vehicle), Is.True, "Driver should automatically have the vehicle added.");
+    }
+
+    [Test]
+    public void ChangeDriver_UpdatesBothDrivers()
+    {
+        // Arrange
+        var driver1 = MakeDriver(licenseNumber: "D1");
+        var driver2 = MakeDriver(licenseNumber: "D2");
+        var vehicle = new SUV("V3", "Toyota", 4, true, new Fuel(100f), true);
+
+        // Act
+        vehicle.AssignedDriver = driver1; // Assign to D1
+        vehicle.AssignedDriver = driver2; // Reassign to D2
+
+        // Assert
+        // Driver with licenseNumber D1 should NO LONGER have the vehicle
+        Assert.That(driver1.AssignedVehicles.Contains(vehicle), Is.False, "Vehicle should be removed from old driver.");
+        
+        // Driver with licenseNumber D2 SHOULD have the vehicle
+        Assert.That(driver2.AssignedVehicles.Contains(vehicle), Is.True, "Vehicle should be added to new driver.");
+        
+        // Vehicle should point to D2
+        Assert.That(vehicle.AssignedDriver, Is.EqualTo(driver2));
+    }
+
+    [Test]
+    public void TestDriverRemoveAssignedVehicleRemovesReverseConnection()
+    {
+        // Arrange
+        var driver = MakeDriver();
+        var vehicle = new SUV("V4", "Honda", 4, true, new Fuel(100f), true);
+        driver.AddAssignedVehicle(vehicle);
+
+        // Pre-check
+        Assert.That(vehicle.AssignedDriver, Is.EqualTo(driver));
+
+        // Act
+        driver.RemoveAssignedVehicle(vehicle);
+
+        // Assert
+        Assert.That(driver.AssignedVehicles.Contains(vehicle), Is.False);
+        Assert.That(vehicle.AssignedDriver, Is.Null, "Vehicle should be unassigned when removed from driver.");
     }
 }

@@ -25,6 +25,34 @@ public abstract class Vehicle
 
     [XmlIgnore]
     public IEnumerable<ReservationVehicle> ReservationVehicles => _reservationVehicles.ToList();
+    
+    [XmlIgnore]
+    private Driver? _assignedDriver;
+    
+    [XmlIgnore]
+    public Driver? AssignedDriver
+    {
+        get => _assignedDriver;
+        set
+        {
+            // Avoid infinite recursion if setting the same driver
+            if (_assignedDriver == value) return;
+            
+            if (_assignedDriver != null)
+            {
+                var oldDriver = _assignedDriver;
+                _assignedDriver = null;
+                oldDriver.RemoveAssignedVehicle(this);
+            }
+            _assignedDriver = value;
+            
+            //Reverse Connection
+            if (_assignedDriver != null)
+            {
+                _assignedDriver.AddAssignedVehicle(this);
+            }
+        }
+    }
 
     public string PlateNumber
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using BYT_04.Utility;
+using BYT_04.Vehicles;
 
 namespace BYT_04
 {
@@ -14,6 +15,12 @@ namespace BYT_04
         // ============================================================
 
         private static List<Driver> _drivers = new();
+        
+        [XmlIgnore]
+        private HashSet<Vehicle> _assignedVehicles = new();
+
+        [XmlIgnore]
+        public IEnumerable<Vehicle> AssignedVehicles => _assignedVehicles.ToList();
 
         private static string _directoryPath =
             Path.GetFullPath(Path.Combine(
@@ -152,5 +159,35 @@ namespace BYT_04
         // ============================================================
 
         public bool IsLicenseValid() => LicenseExpiry >= DateTime.Today;
+        
+        public void AddAssignedVehicle(Vehicle v)
+        {
+            if (v == null) return;
+
+            // Prevent infinite recursion and duplicates
+            if (!_assignedVehicles.Contains(v))
+            {
+                _assignedVehicles.Add(v);
+
+                // Reverse Connection
+                if (v.AssignedDriver != this)
+                {
+                    v.AssignedDriver = this;
+                }
+            }
+        }
+
+        public void RemoveAssignedVehicle(Vehicle v)
+        {
+            if (v != null && _assignedVehicles.Contains(v))
+            {
+                _assignedVehicles.Remove(v);
+                
+                if (v.AssignedDriver == this)
+                {
+                    v.AssignedDriver = null; 
+                }
+            }
+        }
     }
 }
