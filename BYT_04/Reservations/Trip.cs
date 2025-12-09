@@ -26,6 +26,13 @@ public class Trip
     private DateTime _startDate;
     private DateTime _endDate;
     private decimal _pricePerPerson;
+    
+    // Association
+    [XmlIgnore]
+    private HashSet<TripEquipment> _tripEquipments = new();
+
+    [XmlIgnore]
+    public IEnumerable<TripEquipment> TripEquipments => _tripEquipments.ToList();
 
    
     public string Name
@@ -115,6 +122,32 @@ public class Trip
         Description = description;
 
         AddTrip(this);
+    }
+    
+    // Associations Methods
+    public void AddTripEquipment(TripEquipment te)
+    {
+        if (te == null) return;
+
+        // Prevent infinite recursion and duplicates
+        if (!_tripEquipments.Contains(te))
+        {
+            _tripEquipments.Add(te);
+
+            // Trigger Reverse Connection
+            if (te.Trip != this)
+            {
+                te.Trip = this;
+            }
+        }
+    }
+
+    public void RemoveTripEquipment(TripEquipment te)
+    {
+        if (te != null && _tripEquipments.Contains(te))
+        {
+            _tripEquipments.Remove(te);
+        }
     }
 
     // --------- Extent stuff ----------

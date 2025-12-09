@@ -24,17 +24,27 @@ public class TripEquipment
     private int _quantity;
     private string? _notes;
 
-
+    // Association
     public Trip Trip
     {
         get => _trip;
-        set => _trip = value ?? throw new ArgumentException("Trip cannot be null.");
+        set
+        {
+            _trip = value ?? throw new ArgumentException("Trip cannot be null.");
+            // Trigger Reverse Connection
+            _trip.AddTripEquipment(this);
+        }
     }
 
     public Equipment Equipment
     {
         get => _equipment;
-        set => _equipment = value ?? throw new ArgumentException("Equipment cannot be null.");
+        set
+        {
+            _equipment = value ?? throw new ArgumentException("Equipment cannot be null.");
+            // Trigger Reverse Connection
+            _equipment.AddTripEquipment(this);
+        }
     }
 
     public int Quantity

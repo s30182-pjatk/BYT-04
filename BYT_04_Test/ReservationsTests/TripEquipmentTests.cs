@@ -101,6 +101,59 @@ namespace BYT_04.Tests.ReservationsTests
             var expectedPath = Path.Combine(tempDir, "tripequipment.xml");
             Assert.That(File.Exists(expectedPath), Is.True);
         }
+        
+        [Test]
+        public void Ctor_ShouldCreateReverseConnectionsAutomatically()
+        {
+            // Arrange
+            var trip = CreateSampleTrip();
+            var eq = CreateSampleEquipment();
+
+            // Act
+            var link = new TripEquipment(trip, eq, 5, "Safety gear");
+
+            // Assert - Verify the link appears in the Parent collections
+            Assert.That(trip.TripEquipments.Contains(link), Is.True, 
+                "Trip should contain the link in its collection.");
+            Assert.That(eq.TripEquipments.Contains(link), Is.True, 
+                "Equipment should contain the link in its collection.");
+        }
+        
+        [Test]
+        public void RemoveLink_ShouldRemoveReverseConnections()
+        {
+            // Arrange
+            var trip = CreateSampleTrip();
+            var eq = CreateSampleEquipment();
+            var link = new TripEquipment(trip, eq, 5);
+
+            // Act - Remove from one side
+            trip.RemoveTripEquipment(link);
+
+            // Assert
+            Assert.That(trip.TripEquipments.Contains(link), Is.False, 
+                "Link should be removed from Trip collection.");
+            
+        }
+        
+        [Test]
+        public void BagConstraint_ShouldAllowMultipleLinksBetweenSameObjects()
+        {
+            // Arrange
+            var trip = CreateSampleTrip();
+            var eq = CreateSampleEquipment();
+
+            // Act
+            // Link 1
+            var link1 = new TripEquipment(trip, eq, 5, "Batch 1");
+            // Link 2 (Same Trip, Same Equipment, but new Link Object)
+            var link2 = new TripEquipment(trip, eq, 3, "Batch 2");
+
+            // Assert
+            Assert.That(trip.TripEquipments.Count(), Is.EqualTo(2));
+            Assert.That(trip.TripEquipments.Contains(link1), Is.True);
+            Assert.That(trip.TripEquipments.Contains(link2), Is.True);
+        }
 
         // helpers
 
