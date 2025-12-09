@@ -25,9 +25,13 @@ public class Reservation
     // Association
     [XmlIgnore]
     private HashSet<ReservationAccomodation> _reservationAccomodations = new();
-
     [XmlIgnore]
     public IEnumerable<ReservationAccomodation> ReservationAccomodations => _reservationAccomodations.ToList();
+    
+    [XmlIgnore]
+    private HashSet<ReservationVehicle> _reservationVehicles = new();
+    [XmlIgnore]
+    public IEnumerable<ReservationVehicle> ReservationVehicles => _reservationVehicles.ToList();
     
     public int ReservationId
     {
@@ -138,6 +142,31 @@ public class Reservation
         if (ra != null && _reservationAccomodations.Contains(ra))
         {
             _reservationAccomodations.Remove(ra);
+        }
+    }
+    
+    public void AddReservationVehicle(ReservationVehicle rv)
+    {
+        if (rv == null) return;
+
+        // Prevent infinite recursion and duplicates
+        if (!_reservationVehicles.Contains(rv))
+        {
+            _reservationVehicles.Add(rv);
+
+            // Trigger Reverse Connection
+            if (rv.Reservation != this)
+            {
+                rv.Reservation = this;
+            }
+        }
+    }
+
+    public void RemoveReservationVehicle(ReservationVehicle rv)
+    {
+        if (rv != null && _reservationVehicles.Contains(rv))
+        {
+            _reservationVehicles.Remove(rv);
         }
     }
     

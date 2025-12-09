@@ -349,5 +349,61 @@ public class ReservationVehicleTest
             Assert.That(loaded2.Notes, Is.Null);
         });
     }
+    
+    [Test]
+    public void TestReservationVehicleShouldCreateReverseConnectionsAutomatically()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var veh = CreateDummyVehicle();
+
+        // Act
+        var rv = new ReservationVehicle(res, veh, "Transport", "Good", 100f, 90f);
+
+        // Assert - Verify the link appears in the Parent collections
+        Assert.That(res.ReservationVehicles.Contains(rv), Is.True, 
+            "Reservation should contain the link in its collection.");
+        Assert.That(veh.ReservationVehicles.Contains(rv), Is.True, 
+            "Vehicle should contain the link in its collection.");
+    }
+    
+    [Test]
+    public void TestReservationVehicleRemoveLinkShouldRemoveReverseConnections()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var veh = CreateDummyVehicle();
+        var rv = new ReservationVehicle(res, veh, "Transport", "Good", 100f, 90f);
+
+        // Pre-check
+        Assert.That(veh.ReservationVehicles.Contains(rv), Is.True);
+
+        // Act - Remove from one side
+        veh.RemoveReservationVehicle(rv);
+
+        // Assert
+        Assert.That(veh.ReservationVehicles.Contains(rv), Is.False, 
+            "Link should be removed from Vehicle collection.");
+    }
+    
+    [Test]
+    public void BagConstraint_AllowsMultipleLinks_BetweenSameObjects()
+    {
+        // Arrange
+        var res = CreateDummyReservation();
+        var veh = CreateDummyVehicle();
+
+        // Act
+        // Link 1: Transporting people
+        var rv1 = new ReservationVehicle(res, veh, "Transport People", "Good", 100f, 80f);
+    
+        // Link 2: Moving Cargo (Same Reservation, Same Vehicle, different purpose/object)
+        var rv2 = new ReservationVehicle(res, veh, "Transport Cargo", "Good", 80f, 60f);
+
+        // Assert
+        Assert.That(res.ReservationVehicles.Count(), Is.EqualTo(2));
+        Assert.That(res.ReservationVehicles.Contains(rv1), Is.True);
+        Assert.That(res.ReservationVehicles.Contains(rv2), Is.True);
+    }
 }
 

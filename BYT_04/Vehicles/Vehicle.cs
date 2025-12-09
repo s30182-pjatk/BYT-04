@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using BYT_04.Reservations;
 using BYT_04.Utility;
 
 namespace BYT_04.Vehicles;
@@ -17,6 +18,13 @@ public abstract class Vehicle
     private int _capacity;
     private bool _containMedKit;
     private VehiclePowerType _powerType = new GenericVehiclePowerType();
+    
+    // Association
+    [XmlIgnore]
+    private HashSet<ReservationVehicle> _reservationVehicles = new();
+
+    [XmlIgnore]
+    public IEnumerable<ReservationVehicle> ReservationVehicles => _reservationVehicles.ToList();
 
     public string PlateNumber
     {
@@ -86,6 +94,33 @@ public abstract class Vehicle
         PowerType = powerType;
 
         AddVehicle(this);
+    }
+    
+    // Association Methods
+    
+    public void AddReservationVehicle(ReservationVehicle rv)
+    {
+        if (rv == null) return;
+
+        // Prevent infinite recursion and duplicates
+        if (!_reservationVehicles.Contains(rv))
+        {
+            _reservationVehicles.Add(rv);
+
+            // Trigger Reverse Connection
+            if (rv.Vehicle != this)
+            {
+                rv.Vehicle = this;
+            }
+        }
+    }
+
+    public void RemoveReservationVehicle(ReservationVehicle rv)
+    {
+        if (rv != null && _reservationVehicles.Contains(rv))
+        {
+            _reservationVehicles.Remove(rv);
+        }
     }
 
     // --------- Extent stuff ----------

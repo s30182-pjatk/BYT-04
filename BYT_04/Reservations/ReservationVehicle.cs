@@ -23,7 +23,12 @@ public class ReservationVehicle
     public Vehicle Vehicle
     {
         get => _vehicle;
-        set => _vehicle = value ?? throw new ArgumentException("Vehicle cannot be null.");
+        set
+        {
+            _vehicle = value ?? throw new ArgumentException("Vehicle cannot be null.");
+            // Trigger Reverse Connection
+            _vehicle.AddReservationVehicle(this);
+        }
     }
 
     private Reservation _reservation = null!;
@@ -31,7 +36,12 @@ public class ReservationVehicle
     public Reservation Reservation
     {
         get => _reservation;
-        set => _reservation = value ?? throw new ArgumentException("Reservation cannot be null.");
+        set
+        {
+            _reservation = value ?? throw new ArgumentException("Reservation cannot be null.");
+            // Trigger Reverse Connection
+            _reservation.AddReservationVehicle(this);
+        }
     }
 
     private string _usgagePurpose = null!;
