@@ -22,13 +22,16 @@ public abstract class Vehicle
     // Association
     [XmlIgnore]
     private HashSet<ReservationVehicle> _reservationVehicles = new();
-
     [XmlIgnore]
     public IEnumerable<ReservationVehicle> ReservationVehicles => _reservationVehicles.ToList();
     
     [XmlIgnore]
-    private Driver? _assignedDriver;
+    private HashSet<Trip> _trips = new();
+    [XmlIgnore]
+    public IEnumerable<Trip> Trips => _trips.ToList();
     
+    [XmlIgnore]
+    private Driver? _assignedDriver;
     [XmlIgnore]
     public Driver? AssignedDriver
     {
@@ -148,6 +151,37 @@ public abstract class Vehicle
         if (rv != null && _reservationVehicles.Contains(rv))
         {
             _reservationVehicles.Remove(rv);
+        }
+    }
+    
+    public void AddTrip(Trip trip)
+    {
+        if (trip == null) return;
+
+        // Prevent infinite recursion
+        if (!_trips.Contains(trip))
+        {
+            _trips.Add(trip);
+
+            // Trigger Reverse Connection
+            if (!trip.Vehicles.Contains(this))
+            {
+                trip.AddVehicle(this);
+            }
+        }
+    }
+
+    public void RemoveTrip(Trip trip)
+    {
+        if (trip != null && _trips.Contains(trip))
+        {
+            _trips.Remove(trip);
+
+            // Reverse Connection removal
+            if (trip.Vehicles.Contains(this))
+            {
+                trip.RemoveVehicle(this);
+            }
         }
     }
 

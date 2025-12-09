@@ -1,5 +1,6 @@
 using BYT_04.Vehicles;
 using BYT_04_Test.TestUtils;
+using BYT_04.Reservations;
 using NUnit.Framework;
 
 namespace BYT_04_Test.VehiclesTests;
@@ -179,6 +180,24 @@ public class VehicleTest
             Assert.That(loadedSuv.PlateNumber, Is.EqualTo("ABC123"));
             Assert.That(loadedAtv.PlateNumber, Is.EqualTo("XYZ789"));
         });
+    }
+    
+    [Test]
+    public void TestTripVehicleAssociationShouldCreateReverseConnection()
+    {
+        // Arrange
+        var trip = new Trip("Safari", "Africa", DateTime.Today, DateTime.Today.AddDays(5), 1000m);
+        var vehicle = new SUV("SAFARI-01", "Jeep", 6, true, new Fuel(100f), true);
+
+        // Act
+        trip.AddVehicle(vehicle);
+
+        // Assert
+        // check if Trip contains Vehicle
+        Assert.That(trip.Vehicles.Contains(vehicle), Is.True);
+    
+        // check if Vehicle contains Trip (Reverse Connection)
+        Assert.That(vehicle.Trips.Contains(trip), Is.True);
     }
 }
 

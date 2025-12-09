@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using BYT_04.Utility;
+using BYT_04.Vehicles;
 
 namespace BYT_04.Reservations;
 
@@ -37,6 +38,12 @@ public class Trip
     private HashSet<Reservation> _reservations = new();
     [XmlIgnore]
     public IEnumerable<Reservation> Reservations => _reservations.ToList();
+    
+    [XmlIgnore]
+    private HashSet<Vehicle> _vehicles = new();
+
+    [XmlIgnore]
+    public IEnumerable<Vehicle> Vehicles => _vehicles.ToList();
 
    
     public string Name
@@ -158,11 +165,12 @@ public class Trip
     {
         if (res == null) return;
         
+        // Prevent infinite recursion and duplicates
         if (!_reservations.Contains(res))
         {
             _reservations.Add(res);
 
-            
+            // Trigger Reverse Connection
             if (!res.ReservationsTrips.Contains(this))
             {
                 res.AddTrip(this);
@@ -179,6 +187,36 @@ public class Trip
             if (res.ReservationsTrips.Contains(this))
             {
                 res.RemoveTrip(this);
+            }
+        }
+    }
+    
+    public void AddVehicle(Vehicle vehicle)
+    {
+        if (vehicle == null) return;
+        
+        // Prevent infinite recursion and duplicates
+        if (!_vehicles.Contains(vehicle))
+        {
+            _vehicles.Add(vehicle);
+
+            // Trigger Reverse Connection
+            if (!vehicle.Trips.Contains(this))
+            {
+                vehicle.AddTrip(this);
+            }
+        }
+    }
+
+    public void RemoveVehicle(Vehicle vehicle)
+    {
+        if (vehicle != null && _vehicles.Contains(vehicle))
+        {
+            _vehicles.Remove(vehicle);
+            
+            if (vehicle.Trips.Contains(this))
+            {
+                vehicle.RemoveTrip(this);
             }
         }
     }
