@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System;
 using System.IO;
 using System.Linq;
+using BYT_04.Vehicles;
 
 namespace BYT_04_Test
 {
@@ -163,6 +164,21 @@ namespace BYT_04_Test
                 Assert.That(loaded.Address.City, Is.EqualTo("Town"));
                 Assert.That(loaded.Address.Country, Is.EqualTo("Country"));
             });
+        }
+        
+        [Test]
+        public void AddParamedicToVehicle_CreatesReverseConnection()
+        {
+            // Arrange
+            var paramedic = new Paramedic("Jane", "A", "Doe", DateTime.Today, "F", "123", "jane@test.com", new Address(), "CERT123");
+            var vehicle = new SUV("AMB-01", "Ford", 4, true, new Fuel(100f), true);
+
+            // Act
+            vehicle.AddParamedic(paramedic);
+
+            // Assert
+            Assert.That(vehicle.Paramedics.Contains(paramedic), Is.True);
+            Assert.That(paramedic.Vehicles.Contains(vehicle), Is.True, "Reverse connection failed.");
         }
     }
 }

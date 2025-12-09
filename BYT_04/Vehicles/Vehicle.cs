@@ -31,6 +31,11 @@ public abstract class Vehicle
     public IEnumerable<Trip> Trips => _trips.ToList();
     
     [XmlIgnore]
+    private HashSet<Paramedic> _paramedics = new();
+    [XmlIgnore]
+    public IEnumerable<Paramedic> Paramedics => _paramedics.ToList();
+    
+    [XmlIgnore]
     private Driver? _assignedDriver;
     [XmlIgnore]
     public Driver? AssignedDriver
@@ -181,6 +186,37 @@ public abstract class Vehicle
             if (trip.Vehicles.Contains(this))
             {
                 trip.RemoveVehicle(this);
+            }
+        }
+    }
+    
+    public void AddParamedic(Paramedic p)
+    {
+        if (p == null) return;
+
+        // Prevent infinite recursion
+        if (!_paramedics.Contains(p))
+        {
+            _paramedics.Add(p);
+
+            // Reverse Connection
+            if (!p.Vehicles.Contains(this))
+            {
+                p.AddVehicle(this);
+            }
+        }
+    }
+
+    public void RemoveParamedic(Paramedic p)
+    {
+        if (p != null && _paramedics.Contains(p))
+        {
+            _paramedics.Remove(p);
+
+            // Reverse Connection Removal
+            if (p.Vehicles.Contains(this))
+            {
+                p.RemoveVehicle(this);
             }
         }
     }

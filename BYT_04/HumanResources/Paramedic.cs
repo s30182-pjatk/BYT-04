@@ -1,3 +1,5 @@
+using BYT_04.Vehicles;
+
 namespace BYT_04;
 
 using System;
@@ -14,6 +16,12 @@ public class Paramedic : Person
     //===========================================
 
     private static List<Paramedic> _paramedics = new();
+    
+    [XmlIgnore]
+    private HashSet<Vehicle> _vehicles = new();
+
+    [XmlIgnore]
+    public IEnumerable<Vehicle> Vehicles => _vehicles.ToList();
 
     private static string _directoryPath =
         Path.GetFullPath(Path.Combine(
@@ -131,4 +139,35 @@ public class Paramedic : Person
     }
 
     public bool IsCertified() => !string.IsNullOrWhiteSpace(CPRCertificationNumber);
+    
+    public void AddVehicle(Vehicle v)
+    {
+        if (v == null) return;
+
+        // Prevent infinite recursion
+        if (!_vehicles.Contains(v))
+        {
+            _vehicles.Add(v);
+
+            // Reverse Connection
+            if (!v.Paramedics.Contains(this))
+            {
+                v.AddParamedic(this);
+            }
+        }
+    }
+
+    public void RemoveVehicle(Vehicle v)
+    {
+        if (v != null && _vehicles.Contains(v))
+        {
+            _vehicles.Remove(v);
+
+            // Reverse Connection Removal
+            if (v.Paramedics.Contains(this))
+            {
+                v.RemoveParamedic(this);
+            }
+        }
+    }
 }
