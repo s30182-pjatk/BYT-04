@@ -106,7 +106,7 @@ public class CustomerTests
         // Assert
         Assert.That(customer.IsVip, Is.True);
     }
-
+    
 
     // ============================================================
     // Save Test

@@ -3,10 +3,10 @@
   <ReservationAccomodation>
     <Reservation>
       <ReservationId>1</ReservationId>
-      <StartDate>2025-12-09T00:00:00+01:00</StartDate>
-      <EndDate>2025-12-16T00:00:00+01:00</EndDate>
+      <StartDate>2025-12-15T00:00:00+01:00</StartDate>
+      <EndDate>2025-12-22T00:00:00+01:00</EndDate>
       <Status>Pending</Status>
-      <TotalPrice>105</TotalPrice>
+      <TotalPrice>105.1</TotalPrice>
     </Reservation>
     <Accomodation>
       <Number>A160</Number>
@@ -14,8 +14,27 @@
       <Capacity>7</Capacity>
     </Accomodation>
     <NumberOfGuests>5</NumberOfGuests>
-    <CheckInDate>2025-12-09T00:00:00+01:00</CheckInDate>
-    <CheckOutDate>2025-12-16T00:00:00+01:00</CheckOutDate>
+    <CheckInDate>2025-12-15T00:00:00+01:00</CheckInDate>
+    <CheckOutDate>2025-12-22T00:00:00+01:00</CheckOutDate>
+    <ConditionBefore>Good</ConditionBefore>
+    <Notes>Heater needs to be fixed</Notes>
+  </ReservationAccomodation>
+  <ReservationAccomodation>
+    <Reservation>
+      <ReservationId>1</ReservationId>
+      <StartDate>2025-12-15T00:00:00+01:00</StartDate>
+      <EndDate>2025-12-22T00:00:00+01:00</EndDate>
+      <Status>Pending</Status>
+      <TotalPrice>105.1</TotalPrice>
+    </Reservation>
+    <Accomodation>
+      <Number>A160</Number>
+      <Type>Room</Type>
+      <Capacity>7</Capacity>
+    </Accomodation>
+    <NumberOfGuests>5</NumberOfGuests>
+    <CheckInDate>2025-12-15T00:00:00+01:00</CheckInDate>
+    <CheckOutDate>2025-12-22T00:00:00+01:00</CheckOutDate>
     <ConditionBefore>Good</ConditionBefore>
     <Notes>Heater needs to be fixed</Notes>
   </ReservationAccomodation>

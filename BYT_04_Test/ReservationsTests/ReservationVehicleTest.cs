@@ -1,6 +1,7 @@
+using BYT_04;
+using BYT_04_Test.TestUtils;
 using BYT_04.Reservations;
 using BYT_04.Vehicles;
-using BYT_04_Test.TestUtils;
 using NUnit.Framework;
 
 namespace BYT_04_Test.ReservationsTests;
@@ -10,18 +11,31 @@ public class ReservationVehicleTest
 {
     private string _tempDir;
     private string _xmlFile;
+    Customer _testCustomer;
 
     [SetUp]
     public void Setup()
     {
         _tempDir = Path.Combine(Path.GetTempPath(), "res_vehicle_persistence_tests");
         _xmlFile = Path.Combine(_tempDir, "reservationvehicles.xml");
-        
+        _testCustomer = new Customer(
+            "Test",
+            null,
+            "TripCustomer",
+            DateTime.Today.AddYears(-30),
+            "Male",
+            "123456789",
+            "trip@example.com",
+            new Address("1 Test St", "Test City", "TS", "12345", "USA"),
+            false,
+            0
+        );
+
         if (Directory.Exists(_tempDir))
             Directory.Delete(_tempDir, true);
 
         Directory.CreateDirectory(_tempDir);
-        
+
         ReservationVehicle.SetDirectory(_tempDir);
 
         // Prevent data bleeding between tests
@@ -33,10 +47,10 @@ public class ReservationVehicleTest
     {
         if (Directory.Exists(_tempDir))
             Directory.Delete(_tempDir, true);
-        
+
         ClearAllExtents();
     }
-    
+
     private void ClearAllExtents()
     {
         //Helper to clear static lists via reflection
@@ -44,41 +58,43 @@ public class ReservationVehicleTest
     }
 
     //Dummy Data Helpers
-    
+
     private Reservation CreateDummyReservation()
     {
-        return new Reservation(1, DateTime.Today, DateTime.Today.AddDays(1), ReservationStatus.Pending, 100m);
+        return _testCustomer.CreateReservation(
+            1,
+            DateTime.Today,
+            DateTime.Today.AddDays(1),
+            ReservationStatus.Pending,
+            100m
+        );
     }
 
     private Vehicle CreateDummyVehicle()
     {
         return new SUV("ABC123", "Toyota", 5, true, new Fuel(100f), true);
     }
-    
+
     //Validation Tests
 
     [Test]
     public void TestReservationVehicleNullReservation()
     {
         var vehicle = CreateDummyVehicle();
-        
-        Assert.Throws<ArgumentException>(() => new ReservationVehicle 
-        { 
-            Reservation = null!, 
-            Vehicle = vehicle 
-        });
+
+        Assert.Throws<ArgumentException>(() =>
+            new ReservationVehicle { Reservation = null!, Vehicle = vehicle }
+        );
     }
 
     [Test]
     public void TestReservationVehicleNullVehicle()
     {
         var res = CreateDummyReservation();
-        
-        Assert.Throws<ArgumentException>(() => new ReservationVehicle 
-        { 
-            Reservation = res, 
-            Vehicle = null! 
-        });
+
+        Assert.Throws<ArgumentException>(() =>
+            new ReservationVehicle { Reservation = res, Vehicle = null! }
+        );
     }
 
     [Test]
@@ -86,9 +102,9 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         Assert.Throws<ArgumentException>(() => rv.UsgagePurpose = null!);
         Assert.Throws<ArgumentException>(() => rv.UsgagePurpose = "");
         Assert.Throws<ArgumentException>(() => rv.UsgagePurpose = "   ");
@@ -99,9 +115,9 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         Assert.Throws<ArgumentException>(() => rv.ConditionBefore = null!);
         Assert.Throws<ArgumentException>(() => rv.ConditionBefore = "");
         Assert.Throws<ArgumentException>(() => rv.ConditionBefore = "   ");
@@ -112,9 +128,9 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         Assert.Throws<ArgumentException>(() => rv.FuelLevelBefore = -1f);
         Assert.Throws<ArgumentException>(() => rv.FuelLevelBefore = -10f);
     }
@@ -124,9 +140,9 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         Assert.Throws<ArgumentException>(() => rv.FuelLevelAfter = -1f);
         Assert.Throws<ArgumentException>(() => rv.FuelLevelAfter = -10f);
     }
@@ -136,14 +152,14 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         rv.FuelLevelBefore = 0f;
         rv.FuelLevelAfter = 0f;
         rv.FuelLevelBefore = 100f;
         rv.FuelLevelAfter = 75.5f;
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(rv.FuelLevelBefore, Is.EqualTo(100f));
@@ -156,18 +172,18 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         rv.ConditionAfter = null;
         Assert.That(rv.ConditionAfter, Is.Null);
-        
+
         rv.ConditionAfter = "";
         Assert.That(rv.ConditionAfter, Is.Null);
-        
+
         rv.ConditionAfter = "   ";
         Assert.That(rv.ConditionAfter, Is.Null);
-        
+
         rv.ConditionAfter = "Excellent";
         Assert.That(rv.ConditionAfter, Is.EqualTo("Excellent"));
     }
@@ -177,30 +193,30 @@ public class ReservationVehicleTest
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         rv.Notes = null;
         Assert.That(rv.Notes, Is.Null);
-        
+
         rv.Notes = "";
         Assert.That(rv.Notes, Is.Null);
-        
+
         rv.Notes = "   ";
         Assert.That(rv.Notes, Is.Null);
-        
+
         rv.Notes = "Some notes";
         Assert.That(rv.Notes, Is.EqualTo("Some notes"));
     }
 
     // Property Tests
-    
+
     [Test]
     public void TestReservationVehicleProperties()
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(
             res,
             vehicle,
@@ -226,15 +242,15 @@ public class ReservationVehicleTest
     }
 
     // Extent Tests
-    
+
     [Test]
     public void TestReservationVehicleExtent_ShouldAddReservationVehicle()
     {
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(res, vehicle, "Transport", "Good", 50f, 30f);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(ReservationVehicle.ReservationVehicles.Count, Is.EqualTo(1));
@@ -250,7 +266,7 @@ public class ReservationVehicleTest
         // Arrange
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var rv = new ReservationVehicle(
             res,
             vehicle,
@@ -275,7 +291,7 @@ public class ReservationVehicleTest
         // Arrange
         var res = CreateDummyReservation();
         var vehicle = CreateDummyVehicle();
-        
+
         var original = new ReservationVehicle(
             res,
             vehicle,
@@ -287,16 +303,24 @@ public class ReservationVehicleTest
             "No issues"
         );
 
-        ReservationVehicle.Save();               
-        
-        ClearAllExtents(); 
-        Assert.That(ReservationVehicle.ReservationVehicles.Count, Is.EqualTo(0), "Memory should be empty before load.");
+        ReservationVehicle.Save();
+
+        ClearAllExtents();
+        Assert.That(
+            ReservationVehicle.ReservationVehicles.Count,
+            Is.EqualTo(0),
+            "Memory should be empty before load."
+        );
 
         // Act
-        ReservationVehicle.Load();               
+        ReservationVehicle.Load();
 
         // Assert
-        Assert.That(ReservationVehicle.ReservationVehicles.Count, Is.EqualTo(1), "Should have loaded exactly 1 item.");
+        Assert.That(
+            ReservationVehicle.ReservationVehicles.Count,
+            Is.EqualTo(1),
+            "Should have loaded exactly 1 item."
+        );
 
         var loaded = ReservationVehicle.ReservationVehicles.First();
 
@@ -318,38 +342,61 @@ public class ReservationVehicleTest
     {
         // Arrange
         var res1 = CreateDummyReservation();
-        var res2 = new Reservation(2, DateTime.Today, DateTime.Today.AddDays(2), ReservationStatus.Pending, 200m);
+        var res2 = _testCustomer.CreateReservation(
+            2,
+            DateTime.Today,
+            DateTime.Today.AddDays(2),
+            ReservationStatus.Pending,
+            200m
+        );
         var vehicle1 = CreateDummyVehicle();
         var vehicle2 = new ATV("XYZ789", "Mercedes", 4, true, new Electric(50f));
-        
-        var rv1 = new ReservationVehicle(res1, vehicle1, "Transport", "Good", 50f, 30f, "Excellent", "No issues");
+
+        var rv1 = new ReservationVehicle(
+            res1,
+            vehicle1,
+            "Transport",
+            "Good",
+            50f,
+            30f,
+            "Excellent",
+            "No issues"
+        );
         var rv2 = new ReservationVehicle(res2, vehicle2, "Tour", "Fair", 80f, 60f, null, null);
-        
-        ReservationVehicle.Save();               
-        
-        ClearAllExtents(); 
-        
+
+        ReservationVehicle.Save();
+
+        ClearAllExtents();
+
         // Act
-        ReservationVehicle.Load();               
+        ReservationVehicle.Load();
 
         // Assert
-        Assert.That(ReservationVehicle.ReservationVehicles.Count, Is.EqualTo(2), "Should have loaded exactly 2 items.");
-        
-        var loaded1 = ReservationVehicle.ReservationVehicles.First(rv => rv.Reservation.ReservationId == 1);
-        var loaded2 = ReservationVehicle.ReservationVehicles.First(rv => rv.Reservation.ReservationId == 2);
-        
+        Assert.That(
+            ReservationVehicle.ReservationVehicles.Count,
+            Is.EqualTo(2),
+            "Should have loaded exactly 2 items."
+        );
+
+        var loaded1 = ReservationVehicle.ReservationVehicles.First(rv =>
+            rv.Reservation.ReservationId == 1
+        );
+        var loaded2 = ReservationVehicle.ReservationVehicles.First(rv =>
+            rv.Reservation.ReservationId == 2
+        );
+
         Assert.Multiple(() =>
         {
             Assert.That(loaded1.UsgagePurpose, Is.EqualTo("Transport"));
             Assert.That(loaded1.ConditionAfter, Is.EqualTo("Excellent"));
             Assert.That(loaded1.Notes, Is.EqualTo("No issues"));
-            
+
             Assert.That(loaded2.UsgagePurpose, Is.EqualTo("Tour"));
             Assert.That(loaded2.ConditionAfter, Is.Null);
             Assert.That(loaded2.Notes, Is.Null);
         });
     }
-    
+
     [Test]
     public void TestReservationVehicleShouldCreateReverseConnectionsAutomatically()
     {
@@ -361,12 +408,18 @@ public class ReservationVehicleTest
         var rv = new ReservationVehicle(res, veh, "Transport", "Good", 100f, 90f);
 
         // Assert - Verify the link appears in the Parent collections
-        Assert.That(res.ReservationVehicles.Contains(rv), Is.True, 
-            "Reservation should contain the link in its collection.");
-        Assert.That(veh.ReservationVehicles.Contains(rv), Is.True, 
-            "Vehicle should contain the link in its collection.");
+        Assert.That(
+            res.ReservationVehicles.Contains(rv),
+            Is.True,
+            "Reservation should contain the link in its collection."
+        );
+        Assert.That(
+            veh.ReservationVehicles.Contains(rv),
+            Is.True,
+            "Vehicle should contain the link in its collection."
+        );
     }
-    
+
     [Test]
     public void TestReservationVehicleRemoveLinkShouldRemoveReverseConnections()
     {
@@ -382,10 +435,13 @@ public class ReservationVehicleTest
         veh.RemoveReservationVehicle(rv);
 
         // Assert
-        Assert.That(veh.ReservationVehicles.Contains(rv), Is.False, 
-            "Link should be removed from Vehicle collection.");
+        Assert.That(
+            veh.ReservationVehicles.Contains(rv),
+            Is.False,
+            "Link should be removed from Vehicle collection."
+        );
     }
-    
+
     [Test]
     public void BagConstraint_AllowsMultipleLinks_BetweenSameObjects()
     {
@@ -396,7 +452,7 @@ public class ReservationVehicleTest
         // Act
         // Link 1: Transporting people
         var rv1 = new ReservationVehicle(res, veh, "Transport People", "Good", 100f, 80f);
-    
+
         // Link 2: Moving Cargo (Same Reservation, Same Vehicle, different purpose/object)
         var rv2 = new ReservationVehicle(res, veh, "Transport Cargo", "Good", 80f, 60f);
 
@@ -406,4 +462,3 @@ public class ReservationVehicleTest
         Assert.That(res.ReservationVehicles.Contains(rv2), Is.True);
     }
 }
-

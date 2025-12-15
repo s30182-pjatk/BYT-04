@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using System.IO;
+using System.Xml.Serialization;
+using BYT_04.Reservations;
 
 namespace BYT_04
 {
@@ -14,12 +15,16 @@ namespace BYT_04
 
         private static List<Customer> _customers = new();
 
-        private static string _directoryPath =
-            Path.GetFullPath(Path.Combine(
+        private static string _directoryPath = Path.GetFullPath(
+            Path.Combine(
                 AppContext.BaseDirectory,
-                "..", "..", "..",
-                "HumanResources", "persistence"
-            ));
+                "..",
+                "..",
+                "..",
+                "HumanResources",
+                "persistence"
+            )
+        );
 
         private static string FilePath => Path.Combine(_directoryPath, "customers.xml");
 
@@ -68,23 +73,55 @@ namespace BYT_04
             foreach (var c in _customers)
             {
                 Console.WriteLine(
-                    $"Name: {c.Name} {c.MiddleName} {c.Surname}\n" +
-                    $"Birth Date: {c.BirthDate.ToShortDateString()}\n" +
-                    $"Gender: {c.Gender}\n" +
-                    $"Phone: {c.PhoneNumber}\n" +
-                    $"Email: {c.Email}\n" +
-                    $"VIP: {(c.IsVip ? "Yes" : "No")}\n" +
-                    $"Loyalty Points: {c.LoyaltyPoints}\n" +
-                    $"Address: {c.Address.Street}, {c.Address.City}, {c.Address.State}, " +
-                    $"{c.Address.PostalCode}, {c.Address.Country}\n" +
-                    "-----------------------------\n"
+                    $"Name: {c.Name} {c.MiddleName} {c.Surname}\n"
+                        + $"Birth Date: {c.BirthDate.ToShortDateString()}\n"
+                        + $"Gender: {c.Gender}\n"
+                        + $"Phone: {c.PhoneNumber}\n"
+                        + $"Email: {c.Email}\n"
+                        + $"VIP: {(c.IsVip ? "Yes" : "No")}\n"
+                        + $"Loyalty Points: {c.LoyaltyPoints}\n"
+                        + $"Address: {c.Address.Street}, {c.Address.City}, {c.Address.State}, "
+                        + $"{c.Address.PostalCode}, {c.Address.Country}\n"
+                        + "-----------------------------\n"
                 );
             }
         }
 
         public static void Add(Customer c) => _customers.Add(c);
+
         public static void Remove(Customer c) => _customers.Remove(c);
 
+        [XmlIgnore]
+        private HashSet<Reservation> _reservations = new();
+
+        //we returned the reservations sorted by the closest start date to the current date because the association is {ordered}
+        [XmlIgnore]
+        public IEnumerable<Reservation> Reservations =>
+            _reservations
+                .OrderBy(m => -(m.StartDate - DateTime.Now))
+                .ThenByDescending(m => m.StartDate)
+                .ToList();
+
+        public Reservation CreateReservation(
+            int reservationId,
+            DateTime startDate,
+            DateTime endDate,
+            ReservationStatus status,
+            decimal totalPrice
+        )
+        {
+            Reservation newReservation = new Reservation(
+                this,
+                reservationId,
+                startDate,
+                endDate,
+                status,
+                totalPrice
+            );
+            _reservations.Add(newReservation);
+
+            return newReservation;
+        }
 
         // ============================================================
         //                  INSTANCE DATA
@@ -110,13 +147,35 @@ namespace BYT_04
             }
         }
 
+        public void AddReservation(Reservation reservation)
+        {
+            if (reservation == null)
+                return;
+            _reservations.Add(reservation);
+        }
+
+        public bool RemoveReservation(int reservationId)
+        {
+            var reservationToRemove = _reservations.FirstOrDefault(r =>
+                r.ReservationId == reservationId
+            );
+            if (reservationToRemove == null)
+            {
+                return false;
+            }
+
+            _reservations.Remove(reservationToRemove);
+            // garbage collector will eventually collect the removed reservation
+            return true;
+        }
 
         // ============================================================
         //                  CONSTRUCTORS
         // ============================================================
 
         // For XML
-        public Customer() : base() { }
+        public Customer()
+            : base() { }
 
         public Customer(
             string name,
@@ -139,13 +198,14 @@ namespace BYT_04
             _customers.Add(this);
         }
 
-
         // ============================================================
         //                  METHODS
         // ============================================================
 
         public int CheckLoyaltyPoints() => LoyaltyPoints;
-        public void MakeVip(){
+
+        public void MakeVip()
+        {
             IsVip = true;
         }
     }

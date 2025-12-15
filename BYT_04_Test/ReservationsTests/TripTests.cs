@@ -10,6 +10,25 @@ namespace BYT_04.Tests.ReservationsTests
     [TestFixture]
     public class TripTests
     {
+        private Customer _testCustomer;
+
+        [SetUp]
+        public void Setup()
+        {
+            _testCustomer = new Customer(
+                "Test",
+                null,
+                "TripCustomer",
+                DateTime.Today.AddYears(-30),
+                "Male",
+                "123456789",
+                "trip@example.com",
+                new Address("1 Test St", "Test City", "TS", "12345", "USA"),
+                false,
+                0
+            );
+        }
+
         [Test]
         public void Constructor_WithValidData_SetsPropertiesAndAddsToExtent()
         {
@@ -53,7 +72,9 @@ namespace BYT_04.Tests.ReservationsTests
                     destination: "Alps",
                     startDate: start,
                     endDate: end,
-                    pricePerPerson: 1000m));
+                    pricePerPerson: 1000m
+                )
+            );
         }
 
         [TestCase("")]
@@ -69,7 +90,9 @@ namespace BYT_04.Tests.ReservationsTests
                     destination: invalidDestination!,
                     startDate: start,
                     endDate: end,
-                    pricePerPerson: 1000m));
+                    pricePerPerson: 1000m
+                )
+            );
         }
 
         [Test]
@@ -138,15 +161,15 @@ namespace BYT_04.Tests.ReservationsTests
             var end = start.AddDays(4);
             _ = new Trip("Persist Trip 1", "Dolomites", start, end, 800m);
 
-            var before = Trip.Trips
-                .Select(t => new
+            var before = Trip
+                .Trips.Select(t => new
                 {
                     t.Name,
                     t.Destination,
                     t.StartDate,
                     t.EndDate,
                     t.PricePerPerson,
-                    t.Description
+                    t.Description,
                 })
                 .ToList();
 
@@ -155,15 +178,15 @@ namespace BYT_04.Tests.ReservationsTests
             Trip.Load();
 
             // assert
-            var after = Trip.Trips
-                .Select(t => new
+            var after = Trip
+                .Trips.Select(t => new
                 {
                     t.Name,
                     t.Destination,
                     t.StartDate,
                     t.EndDate,
                     t.PricePerPerson,
-                    t.Description
+                    t.Description,
                 })
                 .ToList();
 
@@ -186,20 +209,36 @@ namespace BYT_04.Tests.ReservationsTests
             var expectedPath = Path.Combine(tempDir, "trips.xml");
             Assert.That(File.Exists(expectedPath), Is.True);
         }
-        
+
         [Test]
         public void TestAddReservationShouldCreateReverseConnection()
         {
             // Arrange
-            var trip = new Trip("Summer Camp", "Lake", DateTime.Today, DateTime.Today.AddDays(5), 300m);
-            var res = new Reservation(1, DateTime.Today, DateTime.Today.AddDays(5), ReservationStatus.Pending, 300m);
+            var trip = new Trip(
+                "Summer Camp",
+                "Lake",
+                DateTime.Today,
+                DateTime.Today.AddDays(5),
+                300m
+            );
+            var res = _testCustomer.CreateReservation(
+                1,
+                DateTime.Today,
+                DateTime.Today.AddDays(5),
+                ReservationStatus.Pending,
+                300m
+            );
 
             // Act
             trip.AddReservation(res);
 
             // Assert
             Assert.That(trip.Reservations.Contains(res), Is.True);
-            Assert.That(res.ReservationsTrips.Contains(trip), Is.True, "Reverse connection in Reservation should be created.");
+            Assert.That(
+                res.ReservationsTrips.Contains(trip),
+                Is.True,
+                "Reverse connection in Reservation should be created."
+            );
         }
 
         [Test]
@@ -207,15 +246,31 @@ namespace BYT_04.Tests.ReservationsTests
         {
             // Arrange
             var trip = new Trip("Concert Bus", "Stadium", DateTime.Today, DateTime.Today, 50m);
-            var res1 = new Reservation(1, DateTime.Today, DateTime.Today, ReservationStatus.Pending, 50m);
-            var res2 = new Reservation(2, DateTime.Today, DateTime.Today, ReservationStatus.Pending, 50m);
+            var res1 = _testCustomer.CreateReservation(
+                1,
+                DateTime.Today,
+                DateTime.Today,
+                ReservationStatus.Pending,
+                50m
+            );
+            var res2 = _testCustomer.CreateReservation(
+                2,
+                DateTime.Today,
+                DateTime.Today,
+                ReservationStatus.Pending,
+                50m
+            );
 
             // Act
             trip.AddReservation(res1);
             trip.AddReservation(res2);
 
             // Assert
-            Assert.That(trip.Reservations.Count(), Is.EqualTo(2), "Trip should hold multiple reservations.");
+            Assert.That(
+                trip.Reservations.Count(),
+                Is.EqualTo(2),
+                "Trip should hold multiple reservations."
+            );
             Assert.That(res1.ReservationsTrips.Contains(trip), Is.True);
             Assert.That(res2.ReservationsTrips.Contains(trip), Is.True);
         }

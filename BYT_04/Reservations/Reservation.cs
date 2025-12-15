@@ -7,37 +7,44 @@ public enum ReservationStatus
     Pending,
     Confirmed,
     Cancelled,
-    Completed
+    Completed,
 }
 
 [Serializable]
 public class Reservation
 {
-    private static readonly List<Reservation> _reservations = new(); 
+    private static readonly List<Reservation> _reservations = new();
     public static IReadOnlyList<Reservation> Reservations => _reservations.AsReadOnly();
-    
+
     private int _reservationId;
     private DateTime _startDate;
     private DateTime _endDate;
     private ReservationStatus _status;
     private decimal _totalPrice;
-    
+
     // Association
     [XmlIgnore]
-    private HashSet<ReservationAccomodation> _reservationAccomodations = new();
+    public Customer Customer { get; private set; }
+
     [XmlIgnore]
-    public IEnumerable<ReservationAccomodation> ReservationAccomodations => _reservationAccomodations.ToList();
-    
+    private HashSet<ReservationAccomodation> _reservationAccomodations = new();
+
+    [XmlIgnore]
+    public IEnumerable<ReservationAccomodation> ReservationAccomodations =>
+        _reservationAccomodations.ToList();
+
     [XmlIgnore]
     private HashSet<ReservationVehicle> _reservationVehicles = new();
+
     [XmlIgnore]
     public IEnumerable<ReservationVehicle> ReservationVehicles => _reservationVehicles.ToList();
-    
+
     [XmlIgnore]
     private HashSet<Trip> _trips = new();
+
     [XmlIgnore]
     public IEnumerable<Trip> ReservationsTrips => _trips.ToList();
-    
+
     public int ReservationId
     {
         get => _reservationId;
@@ -48,7 +55,7 @@ public class Reservation
             _reservationId = value;
         }
     }
-    
+
     //We ignore this so the Serializer doesn't crash on the validation logic
     [XmlIgnore]
     public DateTime StartDate
@@ -61,7 +68,7 @@ public class Reservation
             _startDate = value;
         }
     }
-    
+
     //used to avoid validating StartDate when loading from xml file
     [XmlElement("StartDate")]
     public DateTime StartDateSerialized
@@ -69,7 +76,7 @@ public class Reservation
         get => _startDate;
         set => _startDate = value; //runs when loading the file, sets the field directly which fixes validation errors when loading
     }
-    
+
     //We ignore this so the Serializer doesn't crash on the validation logic
     [XmlIgnore]
     public DateTime EndDate
@@ -82,7 +89,7 @@ public class Reservation
             _endDate = value;
         }
     }
-    
+
     //used to avoid validating StartDate when loading from xml file and
     [XmlElement("EndDate")]
     public DateTime EndDateSerialized
@@ -90,7 +97,7 @@ public class Reservation
         get => _endDate;
         set => _endDate = value; //runs when loading the file, sets the field directly which fixes validation errors when loading
     }
-    
+
     public ReservationStatus Status
     {
         get => _status;
@@ -107,33 +114,38 @@ public class Reservation
             _totalPrice = value;
         }
     }
-    
-    public Reservation() { }
 
-    public Reservation(int reservationId,
+    public Reservation() { } // Parameterless constructor for XML Serialization
+
+    internal Reservation(
+        Customer customer,
+        int reservationId,
         DateTime startDate,
         DateTime endDate,
         ReservationStatus status,
-        decimal totalPrice)
+        decimal totalPrice
+    )
     {
+        this.Customer = customer ?? throw new ArgumentNullException(nameof(customer));
         ReservationId = reservationId;
         StartDate = startDate;
         EndDate = endDate;
         Status = status;
         TotalPrice = totalPrice;
-        
+
         AddReservation(this);
     }
-    
+
     // Association Methods
     public void AddReservationAccomodation(ReservationAccomodation ra)
     {
-        if (ra == null) return;
+        if (ra == null)
+            return;
 
         if (!_reservationAccomodations.Contains(ra))
         {
             _reservationAccomodations.Add(ra);
-            
+
             // Trigger Reverse Connection
             if (ra.Reservation != this)
             {
@@ -149,10 +161,11 @@ public class Reservation
             _reservationAccomodations.Remove(ra);
         }
     }
-    
+
     public void AddReservationVehicle(ReservationVehicle rv)
     {
-        if (rv == null) return;
+        if (rv == null)
+            return;
 
         // Prevent infinite recursion and duplicates
         if (!_reservationVehicles.Contains(rv))
@@ -174,15 +187,16 @@ public class Reservation
             _reservationVehicles.Remove(rv);
         }
     }
-    
+
     public void AddTrip(Trip trip)
     {
-        if (trip == null) return;
-        
+        if (trip == null)
+            return;
+
         if (!_trips.Contains(trip))
         {
             _trips.Add(trip);
-            
+
             if (!trip.Reservations.Contains(this))
             {
                 trip.AddReservation(this);
@@ -195,14 +209,14 @@ public class Reservation
         if (trip != null && _trips.Contains(trip))
         {
             _trips.Remove(trip);
-            
+
             if (trip.Reservations.Contains(this))
             {
                 trip.RemoveReservation(this);
             }
         }
     }
-    
+
     // Methods
     public void FinalizeReservation()
     {
@@ -215,7 +229,7 @@ public class Reservation
             throw new InvalidOperationException("Only pending reservations can be finalized.");
         }
     }
-    
+
     private static void AddReservation(Reservation reservation)
     {
         if (reservation == null)
@@ -224,17 +238,17 @@ public class Reservation
         }
         _reservations.Add(reservation);
     }
-    
+
     public static List<Reservation> CheckPendingReservations()
     {
         return _reservations.FindAll(r => r.Status == ReservationStatus.Pending);
     }
-    
+
     public static void RemoveCompletedReservations()
     {
         _reservations.RemoveAll(r => r.Status == ReservationStatus.Completed);
     }
-    
+
     public void ChangeReservationStatus(ReservationStatus newStatus)
     {
         Status = newStatus;
@@ -242,21 +256,22 @@ public class Reservation
 
     public override string ToString()
     {
-        return $"ID: {ReservationId}\n" +
-               $"Start: {StartDate.ToShortDateString()}\n" +
-               $"End: {EndDate.ToShortDateString()}\n" +
-               $"Status: {Status}\n" +
-               $"Price: {TotalPrice}\n" +
-               "-----------------------------" ;
+        return $"ID: {ReservationId}\n"
+            + $"Start: {StartDate.ToShortDateString()}\n"
+            + $"End: {EndDate.ToShortDateString()}\n"
+            + $"Status: {Status}\n"
+            + $"Price: {TotalPrice}\n"
+            + "-----------------------------";
     }
-    
+
     //Persistence
-    
-    private static string _directoryPath =
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence"));
+
+    private static string _directoryPath = Path.GetFullPath(
+        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Reservations", "persistence")
+    );
 
     private static string FilePath => Path.Combine(_directoryPath, "reservations.xml");
-    
+
     public static void SetDirectory(string newDirectory)
     {
         if (string.IsNullOrWhiteSpace(newDirectory))
@@ -288,14 +303,13 @@ public class Reservation
 
         var loaded = serializer.Deserialize(fs) as List<Reservation>;
 
-        
         if (loaded != null)
         {
             _reservations.Clear();
             _reservations.AddRange(loaded);
         }
     }
-    
+
     public static void DisplayAll()
     {
         if (_reservations.Count == 0)
