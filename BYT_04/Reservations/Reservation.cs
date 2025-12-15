@@ -26,6 +26,18 @@ public class Reservation
     [XmlIgnore]
     public Customer Customer { get; private set; }
 
+    // Internal helper to set customer during relationship operations
+    internal void SetCustomerInternal(Customer c)
+    {
+        if (c == null)
+            throw new ArgumentNullException(nameof(c));
+        if (Customer != null && Customer != c)
+            throw new InvalidOperationException(
+                "Reservation is already associated with another customer."
+            );
+        Customer = c;
+    }
+
     [XmlIgnore]
     private HashSet<ReservationAccomodation> _reservationAccomodations = new();
 
@@ -237,6 +249,34 @@ public class Reservation
             throw new ArgumentException("Reservation cannot be null");
         }
         _reservations.Add(reservation);
+    }
+
+    // Internal remove helper used for cascade-deletes
+    internal static void InternalRemove(Reservation reservation)
+    {
+        if (reservation == null)
+            return;
+
+        // Remove from static extent
+        _reservations.Remove(reservation);
+
+        // Detach from customer reference
+        try
+        {
+            reservation.Customer = null!; // allow nullifying association internally
+        }
+        catch
+        {
+            // ignore if nullification fails under nullable checks
+        }
+
+        // Remove reservation from any trips' reverse associations
+        foreach (var t in reservation._trips.ToList())
+        {
+            t.RemoveReservation(reservation);
+        }
+
+        // Note: more cleanup could be added for ReservationVehicle/ReservationAccomodation
     }
 
     public static List<Reservation> CheckPendingReservations()

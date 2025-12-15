@@ -89,7 +89,19 @@ namespace BYT_04
 
         public static void Add(Customer c) => _customers.Add(c);
 
-        public static void Remove(Customer c) => _customers.Remove(c);
+        public static void Remove(Customer c)
+        {
+            if (c == null)
+                return;
+            foreach (var r in c._reservations.ToList())
+            {
+                Reservation.InternalRemove(r);
+            }
+
+            c._reservations.Clear();
+
+            _customers.Remove(c);
+        }
 
         [XmlIgnore]
         private HashSet<Reservation> _reservations = new();
@@ -151,7 +163,19 @@ namespace BYT_04
         {
             if (reservation == null)
                 return;
-            _reservations.Add(reservation);
+
+            // Prevent sharing a Reservation between different Customers
+            if (reservation.Customer != null && reservation.Customer != this)
+                throw new InvalidOperationException(
+                    "Reservation is already associated with another customer."
+                );
+
+            // If reservation has no customer, set it to this customer
+            if (reservation.Customer == null)
+                reservation.SetCustomerInternal(this);
+
+            if (!_reservations.Contains(reservation))
+                _reservations.Add(reservation);
         }
 
         public bool RemoveReservation(int reservationId)
