@@ -1,173 +1,209 @@
 using BYT_04.Vehicles;
-
-namespace BYT_04;
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 using System.IO;
 using BYT_04.Utility;
 
-[Serializable]
-public class Paramedic : Person
+namespace BYT_04
 {
-    //===========================================
-    // STATIC PERSISTENCE MEMBERS
-    //===========================================
-
-    private static List<Paramedic> _paramedics = new();
-    
-    [XmlIgnore]
-    private HashSet<Vehicle> _vehicles = new();
-
-    [XmlIgnore]
-    public IEnumerable<Vehicle> Vehicles => _vehicles.ToList();
-
-    private static string _directoryPath =
-        Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..", "..", "..",
-            "HumanResources", "persistence"
-        ));
-
-    private static string FilePath => Path.Combine(_directoryPath, "paramedics.xml");
-
-    public static IReadOnlyList<Paramedic> Paramedics => _paramedics;
-
-
-    // -- Set custom directory ------------------------------------------------
-    public static void SetDirectory(string newDirectory)
+    [Serializable]
+    public class Paramedic
     {
-        if (string.IsNullOrWhiteSpace(newDirectory))
-            throw new ArgumentException("Directory path cannot be null or empty.");
+        // ============================================================
+        //                STATIC PERSISTENCE MEMBERS
+        // ============================================================
 
-        _directoryPath = newDirectory;
-    }
+        private static List<Paramedic> _paramedics = new();
 
+        private static string _directoryPath =
+            Path.GetFullPath(Path.Combine(
+                AppContext.BaseDirectory,
+                "..", "..", "..",
+                "HumanResources", "persistence"
+            ));
 
-    // -- Add / Remove --------------------------------------------------------
-    public static void Add(Paramedic p) => _paramedics.Add(p);
-    public static void Remove(Paramedic p) => _paramedics.Remove(p);
+        private static string FilePath => Path.Combine(_directoryPath, "paramedics.xml");
 
+        public static IReadOnlyList<Paramedic> Paramedics => _paramedics;
 
-    // -- Save ----------------------------------------------------------------
-    public static void Save()
-    {
-        Console.WriteLine("Saving paramedics to: " + FilePath);
-
-        if (!Directory.Exists(_directoryPath))
-            Directory.CreateDirectory(_directoryPath);
-
-        XmlSerializer serializer = new(typeof(List<Paramedic>));
-        using FileStream fs = new(FilePath, FileMode.Create);
-        serializer.Serialize(fs, _paramedics);
-    }
-
-
-    // -- Load ----------------------------------------------------------------
-    public static void Load()
-    {
-        Console.WriteLine("Loading paramedics from: " + FilePath);
-
-        if (!File.Exists(FilePath))
-            return;
-
-        XmlSerializer serializer = new(typeof(List<Paramedic>));
-        using FileStream fs = new(FilePath, FileMode.Open);
-
-        if (serializer.Deserialize(fs) is List<Paramedic> loaded)
-            _paramedics = loaded;
-    }
-
-
-    // -- Display -------------------------------------------------------------
-    public static void DisplayAll()
-    {
-        if (_paramedics.Count == 0)
+        // -- Set custom directory ------------------------------------
+        public static void SetDirectory(string newDirectory)
         {
-            Console.WriteLine("No paramedics found.");
-            return;
+            if (string.IsNullOrWhiteSpace(newDirectory))
+                throw new ArgumentException("Directory path cannot be null or empty.");
+
+            _directoryPath = newDirectory;
         }
 
-        Console.WriteLine("\n--- Loaded Paramedics ---\n");
+        // -- Add / Remove --------------------------------------------
+        public static void Add(Paramedic p) => _paramedics.Add(p);
+        public static void Remove(Paramedic p) => _paramedics.Remove(p);
 
-        foreach (var p in _paramedics)
+        // -- Save -----------------------------------------------------
+        public static void Save()
         {
-            Console.WriteLine(
-                $"Name: {p.Name} {p.MiddleName} {p.Surname}\n" +
-                $"Birth Date: {p.BirthDate.ToShortDateString()}\n" +
-                $"Gender: {p.Gender}\n" +
-                $"Phone: {p.PhoneNumber}\n" +
-                $"Email: {p.Email}\n" +
-                $"Address: {p.Address.Street}, {p.Address.City}, {p.Address.State}, {p.Address.PostalCode}, {p.Address.Country}\n" +
-                $"CPR Certification Number: {p.CPRCertificationNumber}\n" +
-                "-----------------------------\n"
+            if (!Directory.Exists(_directoryPath))
+                Directory.CreateDirectory(_directoryPath);
+
+            XmlSerializer serializer = new(typeof(List<Paramedic>));
+            using FileStream fs = new(FilePath, FileMode.Create);
+            serializer.Serialize(fs, _paramedics);
+        }
+
+        // -- Load -----------------------------------------------------
+        public static void Load()
+        {
+            if (!File.Exists(FilePath))
+                return;
+
+            XmlSerializer serializer = new(typeof(List<Paramedic>));
+            using FileStream fs = new(FilePath, FileMode.Open);
+
+            if (serializer.Deserialize(fs) is List<Paramedic> loaded)
+            {
+                _paramedics.Clear();
+                _paramedics.AddRange(loaded);
+            }
+        }
+
+        // -- Display --------------------------------------------------
+        public static void DisplayAll()
+        {
+            if (_paramedics.Count == 0)
+            {
+                Console.WriteLine("No paramedics found.");
+                return;
+            }
+
+            Console.WriteLine("\n--- Loaded Paramedics ---\n");
+
+            foreach (var p in _paramedics)
+            {
+                Console.WriteLine(
+                    $"Name: {p.Name} {p.MiddleName} {p.Surname}\n" +
+                    $"Birth Date: {p.BirthDate.ToShortDateString()}\n" +
+                    $"Gender: {p.Gender}\n" +
+                    $"Phone: {p.PhoneNumber}\n" +
+                    $"Email: {p.Email}\n" +
+                    $"Address: {p.Address.Street}, {p.Address.City}, {p.Address.State}, {p.Address.PostalCode}, {p.Address.Country}\n" +
+                    $"CPR Certification Number: {p.CPRCertificationNumber}\n" +
+                    "-----------------------------\n"
+                );
+            }
+        }
+
+        // ============================================================
+        //                  PERSON (COMPOSITION)
+        // ============================================================
+
+        private Person _person = null!;
+
+        [XmlElement("Person")]
+        public Person Person
+        {
+            get => _person;
+            set => _person = value ?? throw new ArgumentNullException(nameof(Person));
+        }
+
+        // Delegated Person properties
+        [XmlIgnore] public string Name => _person.Name;
+        [XmlIgnore] public string? MiddleName => _person.MiddleName;
+        [XmlIgnore] public string Surname => _person.Surname;
+        [XmlIgnore] public DateTime BirthDate => _person.BirthDate;
+        [XmlIgnore] public string Gender => _person.Gender;
+        [XmlIgnore] public string PhoneNumber => _person.PhoneNumber;
+        [XmlIgnore] public string Email => _person.Email;
+        [XmlIgnore] public Address Address => _person.Address;
+
+        // ============================================================
+        //                  VEHICLE ASSOCIATION
+        // ============================================================
+
+        [XmlIgnore]
+        private HashSet<Vehicle> _vehicles = new();
+
+        [XmlIgnore]
+        public IEnumerable<Vehicle> Vehicles => _vehicles.ToList();
+
+        public void AddVehicle(Vehicle v)
+        {
+            if (v == null)
+                return;
+
+            if (_vehicles.Add(v))
+            {
+                if (!v.Paramedics.Contains(this))
+                    v.AddParamedic(this);
+            }
+        }
+
+        public void RemoveVehicle(Vehicle v)
+        {
+            if (v == null)
+                return;
+
+            if (_vehicles.Remove(v))
+            {
+                if (v.Paramedics.Contains(this))
+                    v.RemoveParamedic(this);
+            }
+        }
+
+        // ============================================================
+        //                  PARAMEDIC DATA
+        // ============================================================
+
+        private string _cprCertificationNumber = null!;
+
+        public string CPRCertificationNumber
+        {
+            get => _cprCertificationNumber;
+            set => _cprCertificationNumber =
+                value.ValidateRequiredString(nameof(CPRCertificationNumber));
+        }
+
+        // ============================================================
+        //                  CONSTRUCTORS
+        // ============================================================
+
+        // For XML
+        public Paramedic() { }
+
+        public Paramedic(
+            string name,
+            string? middleName,
+            string surname,
+            DateTime birthDate,
+            string gender,
+            string phoneNumber,
+            string email,
+            Address address,
+            string cprCertificationNumber
+        )
+        {
+            Person = new Person(
+                name,
+                middleName,
+                surname,
+                birthDate,
+                gender,
+                phoneNumber,
+                email,
+                address
             );
+
+            CPRCertificationNumber = cprCertificationNumber;
+
+            _paramedics.Add(this);
         }
-    }
 
+        // ============================================================
+        //                  METHODS
+        // ============================================================
 
-    //===========================================
-    // INSTANCE MEMBERS
-    //===========================================
-
-    private string _cprCertificationNumber = null!;
-
-    public string CPRCertificationNumber
-    {
-        get => _cprCertificationNumber;
-        set => _cprCertificationNumber = value.ValidateRequiredString("CPR Certificate Number");
-    }
-
-    public Paramedic() : base() { }
-
-    public Paramedic(
-        string name,
-        string? middleName,
-        string surname,
-        DateTime birthDate,
-        string gender,
-        string phoneNumber,
-        string email,
-        Address address,
-        string cprCertificationNumber
-    ) : base(name, middleName, surname, birthDate, gender, phoneNumber, email, address)
-    {
-        CPRCertificationNumber = cprCertificationNumber;
-        
-        _paramedics.Add(this);
-    }
-
-    public bool IsCertified() => !string.IsNullOrWhiteSpace(CPRCertificationNumber);
-    
-    public void AddVehicle(Vehicle v)
-    {
-        if (v == null) return;
-
-        // Prevent infinite recursion
-        if (!_vehicles.Contains(v))
-        {
-            _vehicles.Add(v);
-
-            // Reverse Connection
-            if (!v.Paramedics.Contains(this))
-            {
-                v.AddParamedic(this);
-            }
-        }
-    }
-
-    public void RemoveVehicle(Vehicle v)
-    {
-        if (v != null && _vehicles.Contains(v))
-        {
-            _vehicles.Remove(v);
-
-            // Reverse Connection Removal
-            if (v.Paramedics.Contains(this))
-            {
-                v.RemoveParamedic(this);
-            }
-        }
+        public bool IsCertified() =>
+            !string.IsNullOrWhiteSpace(CPRCertificationNumber);
     }
 }
