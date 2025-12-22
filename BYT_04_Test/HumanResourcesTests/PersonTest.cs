@@ -37,7 +37,7 @@ namespace BYT_04_Test
             var person = new Customer("Gleb", null, "Denisov", date1,
                 "male", "+48999999999", "email@gmail.com", address, false, 0);
 
-            Assert.That(person.GetAge(), Is.EqualTo(10));
+            Assert.That(person.Person.GetAge(), Is.EqualTo(10));
         }
 
 
@@ -56,15 +56,13 @@ namespace BYT_04_Test
 
             Person.SetDirectory(tempDir);
 
-            var person = new Customer(
+            var person = new Person(
                 "John", "A", "Doe",
                 new DateTime(1990, 5, 12),
                 "Male",
                 "123456789",
                 "john.doe@example.com",
-                new Address("123 Street", "City", "State", "11111", "Country"),
-                false,
-                0
+                new Address("123 Street", "City", "State", "11111", "Country")
             );
 
             Person.Add(person);
