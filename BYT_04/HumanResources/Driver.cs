@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 using System.IO;
 using BYT_04.Utility;
@@ -8,19 +9,13 @@ using BYT_04.Vehicles;
 namespace BYT_04
 {
     [Serializable]
-    public class Driver : Person
+    public class Driver
     {
         // ============================================================
         //                STATIC EXTENT & PERSISTENCE
         // ============================================================
 
         private static List<Driver> _drivers = new();
-        
-        [XmlIgnore]
-        private HashSet<Vehicle> _assignedVehicles = new();
-
-        [XmlIgnore]
-        public IEnumerable<Vehicle> AssignedVehicles => _assignedVehicles.ToList();
 
         private static string _directoryPath =
             Path.GetFullPath(Path.Combine(
@@ -33,7 +28,6 @@ namespace BYT_04
 
         public static IReadOnlyList<Driver> Drivers => _drivers;
 
-
         public static void SetDirectory(string newDirectory)
         {
             if (string.IsNullOrWhiteSpace(newDirectory))
@@ -41,7 +35,6 @@ namespace BYT_04
 
             _directoryPath = newDirectory;
         }
-
 
         public static void Save()
         {
@@ -53,7 +46,6 @@ namespace BYT_04
             serializer.Serialize(fs, _drivers);
         }
 
-
         public static void Load()
         {
             if (!File.Exists(FilePath))
@@ -63,50 +55,78 @@ namespace BYT_04
             using FileStream fs = new(FilePath, FileMode.Open);
 
             if (serializer.Deserialize(fs) is List<Driver> loaded)
-                _drivers = loaded;
-        }
-
-
-        public static void DisplayAll()
-        {
-            if (_drivers.Count == 0)
             {
-                Console.WriteLine("No drivers found.");
-                return;
-            }
-
-            Console.WriteLine("\n--- Loaded Drivers ---\n");
-
-            foreach (var d in _drivers)
-            {
-                Console.WriteLine(
-                    $"Name: {d.Name} {d.MiddleName} {d.Surname}\n" +
-                    $"Birth Date: {d.BirthDate.ToShortDateString()}\n" +
-                    $"Gender: {d.Gender}\n" +
-                    $"Phone: {d.PhoneNumber}\n" +
-                    $"Email: {d.Email}\n" +
-                    $"Address: {d.Address.Street}, {d.Address.City}, {d.Address.State}, {d.Address.PostalCode}, {d.Address.Country}\n" +
-                    $"License Number: {d.LicenseNumber}\n" +
-                    $"License Expiry: {d.LicenseExpiry.ToShortDateString()}\n" +
-                    $"License Valid: {(d.IsLicenseValid() ? "Yes" : "No")}\n" +
-                    "-----------------------------\n"
-                );
+                _drivers.Clear();
+                _drivers.AddRange(loaded);
             }
         }
-
 
         public static void Add(Driver d) => _drivers.Add(d);
         public static void Remove(Driver d) => _drivers.Remove(d);
 
+        // ============================================================
+        //                  PERSON (COMPOSITION)
+        // ============================================================
 
+        private Person _person = null!;
+
+        [XmlElement("Person")]
+        public Person Person
+        {
+            get => _person;
+            set => _person = value ?? throw new ArgumentNullException(nameof(Person));
+        }
+
+        // Delegated Person properties
+        [XmlIgnore] public string Name => _person.Name;
+        [XmlIgnore] public string? MiddleName => _person.MiddleName;
+        [XmlIgnore] public string Surname => _person.Surname;
+        [XmlIgnore] public DateTime BirthDate => _person.BirthDate;
+        [XmlIgnore] public string Gender => _person.Gender;
+        [XmlIgnore] public string PhoneNumber => _person.PhoneNumber;
+        [XmlIgnore] public string Email => _person.Email;
+        [XmlIgnore] public Address Address => _person.Address;
 
         // ============================================================
-        //                  INSTANCE DATA
+        //                  VEHICLE ASSOCIATION
+        // ============================================================
+
+        [XmlIgnore]
+        private HashSet<Vehicle> _assignedVehicles = new();
+
+        [XmlIgnore]
+        public IEnumerable<Vehicle> AssignedVehicles => _assignedVehicles.ToList();
+
+        public void AddAssignedVehicle(Vehicle v)
+        {
+            if (v == null)
+                return;
+
+            if (_assignedVehicles.Add(v))
+            {
+                if (v.AssignedDriver != this)
+                    v.AssignedDriver = this;
+            }
+        }
+
+        public void RemoveAssignedVehicle(Vehicle v)
+        {
+            if (v == null)
+                return;
+
+            if (_assignedVehicles.Remove(v))
+            {
+                if (v.AssignedDriver == this)
+                    v.AssignedDriver = null;
+            }
+        }
+
+        // ============================================================
+        //                  DRIVER DATA
         // ============================================================
 
         private string _licenseNumber = null!;
         private DateTime _licenseExpiry;
-
 
         public string LicenseNumber
         {
@@ -125,13 +145,12 @@ namespace BYT_04
             }
         }
 
-
         // ============================================================
         //                  CONSTRUCTORS
         // ============================================================
 
-        // Parameterless ctor for XML – must NOT add to extent
-        public Driver() : base() { }
+        // Parameterless constructor for XML
+        public Driver() { }
 
         public Driver(
             string name,
@@ -144,50 +163,29 @@ namespace BYT_04
             Address address,
             string licenseNumber,
             DateTime licenseExpiry
-        ) : base(name, middleName, surname, birthDate, gender, phoneNumber, email, address)
+        )
         {
+            Person = new Person(
+                name,
+                middleName,
+                surname,
+                birthDate,
+                gender,
+                phoneNumber,
+                email,
+                address
+            );
+
             LicenseNumber = licenseNumber;
             LicenseExpiry = licenseExpiry;
 
-            // Auto-register into static extent
             _drivers.Add(this);
         }
-
 
         // ============================================================
         //                  METHODS
         // ============================================================
 
         public bool IsLicenseValid() => LicenseExpiry >= DateTime.Today;
-        
-        public void AddAssignedVehicle(Vehicle v)
-        {
-            if (v == null) return;
-
-            // Prevent infinite recursion and duplicates
-            if (!_assignedVehicles.Contains(v))
-            {
-                _assignedVehicles.Add(v);
-
-                // Reverse Connection
-                if (v.AssignedDriver != this)
-                {
-                    v.AssignedDriver = this;
-                }
-            }
-        }
-
-        public void RemoveAssignedVehicle(Vehicle v)
-        {
-            if (v != null && _assignedVehicles.Contains(v))
-            {
-                _assignedVehicles.Remove(v);
-                
-                if (v.AssignedDriver == this)
-                {
-                    v.AssignedDriver = null; 
-                }
-            }
-        }
     }
 }

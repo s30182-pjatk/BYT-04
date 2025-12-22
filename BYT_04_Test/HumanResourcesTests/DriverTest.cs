@@ -133,12 +133,12 @@ public class DriverTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(loaded.Name, Is.EqualTo("John"));
-            Assert.That(loaded.MiddleName, Is.EqualTo("M"));
-            Assert.That(loaded.Surname, Is.EqualTo("Doe"));
+            Assert.That(loaded.Person.Name, Is.EqualTo("John"));
+            Assert.That(loaded.Person.MiddleName, Is.EqualTo("M"));
+            Assert.That(loaded.Person.Surname, Is.EqualTo("Doe"));
 
-            Assert.That(loaded.Email, Is.EqualTo("john@example.com"));
-            Assert.That(loaded.Address.City, Is.EqualTo("City"));
+            Assert.That(loaded.Person.Email, Is.EqualTo("john@example.com"));
+            Assert.That(loaded.Person.Address.City, Is.EqualTo("City"));
 
             Assert.That(loaded.LicenseNumber, Is.EqualTo("ABC123"));
             Assert.That(loaded.LicenseExpiry >= DateTime.Today, Is.True);
