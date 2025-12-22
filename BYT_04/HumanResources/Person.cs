@@ -11,7 +11,7 @@ using System.IO;
 [XmlInclude(typeof(Customer))]
 [XmlInclude(typeof(Paramedic))]
 [XmlInclude(typeof(Driver))]
-public abstract class Person
+public class Person
 {
     // ------------------------------
     //  STATIC PERSISTENCE MEMBERS
