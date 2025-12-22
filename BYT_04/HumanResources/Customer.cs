@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 using BYT_04.Reservations;
 
 namespace BYT_04
 {
     [Serializable]
-    public class Customer : Person
+    public class Customer
     {
         // ============================================================
         //                STATIC EXTENT & PERSISTENCE
@@ -73,16 +74,16 @@ namespace BYT_04
             foreach (var c in _customers)
             {
                 Console.WriteLine(
-                    $"Name: {c.Name} {c.MiddleName} {c.Surname}\n"
-                        + $"Birth Date: {c.BirthDate.ToShortDateString()}\n"
-                        + $"Gender: {c.Gender}\n"
-                        + $"Phone: {c.PhoneNumber}\n"
-                        + $"Email: {c.Email}\n"
-                        + $"VIP: {(c.IsVip ? "Yes" : "No")}\n"
-                        + $"Loyalty Points: {c.LoyaltyPoints}\n"
-                        + $"Address: {c.Address.Street}, {c.Address.City}, {c.Address.State}, "
-                        + $"{c.Address.PostalCode}, {c.Address.Country}\n"
-                        + "-----------------------------\n"
+                    $"Name: {c.Name} {c.MiddleName} {c.Surname}\n" +
+                    $"Birth Date: {c.BirthDate.ToShortDateString()}\n" +
+                    $"Gender: {c.Gender}\n" +
+                    $"Phone: {c.PhoneNumber}\n" +
+                    $"Email: {c.Email}\n" +
+                    $"VIP: {(c.IsVip ? "Yes" : "No")}\n" +
+                    $"Loyalty Points: {c.LoyaltyPoints}\n" +
+                    $"Address: {c.Address.Street}, {c.Address.City}, {c.Address.State}, " +
+                    $"{c.Address.PostalCode}, {c.Address.Country}\n" +
+                    "-----------------------------\n"
                 );
             }
         }
@@ -93,20 +94,43 @@ namespace BYT_04
         {
             if (c == null)
                 return;
+
             foreach (var r in c._reservations.ToList())
             {
                 Reservation.InternalRemove(r);
             }
 
             c._reservations.Clear();
-
             _customers.Remove(c);
         }
+
+        // ============================================================
+        //                  PERSON (COMPOSITION)
+        // ============================================================
+
+        [XmlElement("Person")]
+        private Person _person = null!;
+
+        // Expose Person data via delegation
+        [XmlIgnore] public string Name => _person.Name;
+        [XmlIgnore] public string? MiddleName => _person.MiddleName;
+        [XmlIgnore] public string Surname => _person.Surname;
+        [XmlIgnore] public DateTime BirthDate => _person.BirthDate;
+        [XmlIgnore] public string Gender => _person.Gender;
+        [XmlIgnore] public string PhoneNumber => _person.PhoneNumber;
+        [XmlIgnore] public string Email => _person.Email;
+        [XmlIgnore] public Address Address => _person.Address;
+
+        // Optional access if needed elsewhere
+        public Person Person => _person;
+
+        // ============================================================
+        //                  RESERVATIONS
+        // ============================================================
 
         [XmlIgnore]
         private HashSet<Reservation> _reservations = new();
 
-        //we returned the reservations sorted by the closest start date to the current date because the association is {ordered}
         [XmlIgnore]
         public IEnumerable<Reservation> Reservations =>
             _reservations
@@ -130,13 +154,39 @@ namespace BYT_04
                 status,
                 totalPrice
             );
-            _reservations.Add(newReservation);
 
+            _reservations.Add(newReservation);
             return newReservation;
         }
 
+        public void AddReservation(Reservation reservation)
+        {
+            if (reservation == null)
+                return;
+
+            if (reservation.Customer != null && reservation.Customer != this)
+                throw new InvalidOperationException(
+                    "Reservation is already associated with another customer."
+                );
+
+            if (reservation.Customer == null)
+                reservation.SetCustomerInternal(this);
+
+            _reservations.Add(reservation);
+        }
+
+        public bool RemoveReservation(int reservationId)
+        {
+            var reservation = _reservations.FirstOrDefault(r => r.ReservationId == reservationId);
+            if (reservation == null)
+                return false;
+
+            _reservations.Remove(reservation);
+            return true;
+        }
+
         // ============================================================
-        //                  INSTANCE DATA
+        //                  CUSTOMER DATA
         // ============================================================
 
         private bool _isVip;
@@ -159,47 +209,12 @@ namespace BYT_04
             }
         }
 
-        public void AddReservation(Reservation reservation)
-        {
-            if (reservation == null)
-                return;
-
-            // Prevent sharing a Reservation between different Customers
-            if (reservation.Customer != null && reservation.Customer != this)
-                throw new InvalidOperationException(
-                    "Reservation is already associated with another customer."
-                );
-
-            // If reservation has no customer, set it to this customer
-            if (reservation.Customer == null)
-                reservation.SetCustomerInternal(this);
-
-            if (!_reservations.Contains(reservation))
-                _reservations.Add(reservation);
-        }
-
-        public bool RemoveReservation(int reservationId)
-        {
-            var reservationToRemove = _reservations.FirstOrDefault(r =>
-                r.ReservationId == reservationId
-            );
-            if (reservationToRemove == null)
-            {
-                return false;
-            }
-
-            _reservations.Remove(reservationToRemove);
-            // garbage collector will eventually collect the removed reservation
-            return true;
-        }
-
         // ============================================================
         //                  CONSTRUCTORS
         // ============================================================
 
         // For XML
-        public Customer()
-            : base() { }
+        public Customer() { }
 
         public Customer(
             string name,
@@ -213,12 +228,21 @@ namespace BYT_04
             bool isVip,
             int loyaltyPoints
         )
-            : base(name, middleName, surname, birthDate, gender, phoneNumber, email, address)
         {
+            _person = new Person(
+                name,
+                middleName,
+                surname,
+                birthDate,
+                gender,
+                phoneNumber,
+                email,
+                address
+            );
+
             IsVip = isVip;
             LoyaltyPoints = loyaltyPoints;
 
-            // Register in the static extent
             _customers.Add(this);
         }
 
@@ -228,9 +252,6 @@ namespace BYT_04
 
         public int CheckLoyaltyPoints() => LoyaltyPoints;
 
-        public void MakeVip()
-        {
-            IsVip = true;
-        }
+        public void MakeVip() => IsVip = true;
     }
 }
